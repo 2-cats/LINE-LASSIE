@@ -1,14 +1,27 @@
+image: python:3.5-alpine
+
 stages:
   - style
   - test
 
-pep8:
-  stage: style
-  script:
-    - pip install tox
-    - tox -e pep8
-  tags:
-    - python3/4
+before_script:
+  - apk update && apk upgrade
+  - apk add build-base
+  - python -m pip install --quiet --upgrade pip
+  - python --version
+  - pip --version
+  - pip install --quiet virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install --quiet -r requirement.txt
+
+# pep8:
+#   stage: style
+#   script:
+#     - pip install tox
+#     - tox -e pep8
+#   tags:
+#     - python3/4
 
 unittest-py34:
    stage: test
