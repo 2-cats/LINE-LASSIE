@@ -8,7 +8,7 @@ pep8:
     - pip install tox
     - tox -e pep8
   tags:
-    - python2.7
+    - python3/4
 
 unittest-py34:
    stage: test
