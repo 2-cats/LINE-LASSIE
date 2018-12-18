@@ -1,0 +1,19 @@
+stages:
+  - style
+  - test
+
+pep8:
+  stage: style
+  script:
+    - pip install tox
+    - tox -e pep8
+  tags:
+    - python2.7
+
+unittest-py34:
+   stage: test
+   script:
+     - pip install tox
+     - tox -e py34
+   tags:
+     - python3/4
