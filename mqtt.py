@@ -30,75 +30,62 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("/line/gl1/lassie/alarmlist")
     
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+msg.payload.decode("utf-8"))
-    print(msg.payload.decode("utf-8"))
-    x = msg.payload.decode("utf-8")
-    y=json.loads(x)
+    jsondata=json.loads(msg.payload.decode("utf-8"))
     if msg.topic =="/line/gl1/lassie/alarm":
-        if y['sensor_type'] == "count":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value'])            ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if y['sensor_type'] == "lamp":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value'])            ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if y['sensor_type'] == "current":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value'])            ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if y['sensor_type'] == "state":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value'])        ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if y['sensor_type'] == "temp":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "上下限為" , ":" , str(y['ruleR']['highest']) , "及" , str(
-                y['ruleR']['lowest']) , "   " , "異常值" , ":" , str(y['value'])        ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if y['sensor_type'] == "humidity":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "上下限為" , ":" , str(y['ruleR']['highest']) , "及" , str(
-                y['ruleR']['lowest']) , "   " , "異常值" , ":" , str(y['value'])       ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if y['sensor_type'] == "color":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value'])   ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(y['chat_id'], ImageSendMessage(original_content_url=str(y['image']),
-                                                                     preview_image_url=str(y['image'])))
-        if y['sensor_type'] == "idle":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value']) ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(y['chat_id'], ImageSendMessage(original_content_url=str(y['image']),
-                                                                     preview_image_url=str(y['image'])))
-        if y['sensor_type'] == "safety":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "規則為" , ":" , str(y['rule']) , "異常值" , ":" , str(y['value'])  ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(y['chat_id'], ImageSendMessage(original_content_url=str(y['image']),
-                                                                     preview_image_url=str(y['image'])))
-        if y['sensor_type'] == "ocr":
-            z = ["您" , str(y['thing_name']) , "的" , str(y['sensor_name']) , "於" , str(
-                y['time']) , "出現異常" , "   " , "上下限為" , ":" , str(y['ruleR']['highest']) , "及" , str(
-                y['ruleR']['lowest']) , "   " , "異常值" , ":" , str(y['value'])  ]
-            countmsg=(''.join(z))
-            line_bot_api.push_message(y['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(y['chat_id'], ImageSendMessage(original_content_url=str(y['image']),
-                                                                     preview_image_url=str(y['image'])))        
+        if jsondata['sensor_type'] == "count":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        if jsondata['sensor_type'] == "lamp":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        if jsondata['sensor_type'] == "current":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        if jsondata['sensor_type'] == "state":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        if jsondata['sensor_type'] == "temp":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "上下限為" , ":" , str(jsondata['ruleR']['highest']) , "及" , str(
+                jsondata['ruleR']['lowest']) , "   " , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        if jsondata['sensor_type'] == "humidity":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "上下限為" , ":" , str(jsondata['ruleR']['highest']) , "及" , str(
+                jsondata['ruleR']['lowest']) , "   " , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        if jsondata['sensor_type'] == "color":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+            line_bot_api.push_message(jsondata['chat_id'], ImageSendMessage(original_content_url=str(jsondata['image']),
+                                                                     preview_image_url=str(jsondata['image'])))
+        if jsondata['sensor_type'] == "idle":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+            line_bot_api.push_message(jsondata['chat_id'], ImageSendMessage(original_content_url=str(jsondata['image']),
+                                                                     preview_image_url=str(jsondata['image'])))
+        if jsondata['sensor_type'] == "safety":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "規則為" , ":" , str(jsondata['rule']) , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+            line_bot_api.push_message(jsondata['chat_id'], ImageSendMessage(original_content_url=str(jsondata['image']),
+                                                                     preview_image_url=str(jsondata['image'])))
+        if jsondata['sensor_type'] == "ocr":
+            countmsg=(''.join(["您" , str(jsondata['thing_name']) , "的" , str(jsondata['sensor_name']) , "於" , str(
+                jsondata['time']) , "出現異常" , "   " , "上下限為" , ":" , str(jsondata['ruleR']['highest']) , "及" , str(
+                jsondata['ruleR']['lowest']) , "   " , "異常值" , ":" , str(jsondata['value'])]))
+            line_bot_api.push_message(jsondata['chat_id'], TextSendMessage(text=countmsg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+            line_bot_api.push_message(jsondata['chat_id'], ImageSendMessage(original_content_url=str(jsondata['image']),
+                                                                     preview_image_url=str(jsondata['image'])))
     if msg.topic == "/line/gl1/lassie/alarmlist":
         alarmlist=[]
-        for i in y:
+        for i in jsondata:
             temp=TextComponent(
                 text=i['sensor_type'],
                 wrap=True,
