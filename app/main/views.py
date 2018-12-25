@@ -11,8 +11,6 @@ from .. import db
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config')
 app.config.from_pyfile('config.py')
-print (app.config["LINE_CHANNEL_SECRET"])
-print (app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
