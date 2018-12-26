@@ -44,8 +44,7 @@ def query_user_data(email, phone, line_user_id):
     }
     data = requests.get(''.join(['https://api.sensor.live/api/projects/', app.config['SENSOR_LIVE_PROJECT_ID'] ,'/end_users/list']), headers=headers)
     query_data = data.json()
-    user_items = query_data["items"]
-    for user_item in user_items:
+    for user_item in query_data["items"]:
         if user_item['email'] == email and user_item['phone'] == phone:
             if not check_line_user_id_exist(user_item['username']):
                 bind_line_user_id(user_item['username'], line_user_id)
@@ -62,6 +61,7 @@ def check_line_user_id_exist(username):
     if result:
         return True
     return False
+    database.close()
 
 def bind_line_user_id(username, line_user_id):
     database = connect()
