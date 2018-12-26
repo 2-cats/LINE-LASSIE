@@ -50,7 +50,8 @@ def query_user_data(email, phone, line_user_id):
             if not check_line_user_id_exist(user_item['username']):
                 bind_line_user_id(user_item['username'], line_user_id)
                 return 'success'
-    return 'fail'
+            return 'fail: User has been registered'
+    return 'fail: User not found'
 
 def check_line_user_id_exist(username):
     database = connect()
