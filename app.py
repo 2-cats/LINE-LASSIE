@@ -1,12 +1,13 @@
 import threading
 
-from flask import Flask, abort, request
+from flask import Flask, abort, render_template, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage
 
 import config
 from abnormal import summary
+from bind import bind_line_message, check_bind_result
 from mqtt import client_loop
 
 app = Flask(__name__)
@@ -18,6 +19,23 @@ app.config.from_object(config)
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 # Channel Secret
 handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
+
+# LIFF
+@app.route("/line/bind_email", methods=['GET'])
+def line_bind_email_view():
+    return render_template('line/bind_email.html')
+
+@app.route("/line/bind_phone", methods=['POST'])
+def line_bind_phone_view():
+    email = request.values['email']
+    return render_template('line/bind_phone.html', email = email)
+
+@app.route("/line/bind_check", methods=['POST'])
+def line_bind_view():
+    email = request.values['email']
+    phone = request.values['phone']
+    check_result = check_bind_result(email, phone)
+    return render_template('line/bind_check.html', check_result = check_result)
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -43,6 +61,9 @@ def handle_message(event):
     line_user_id = event.source.user_id
     message_text = event.message.text
 
+    if message_text == "綁定帳號":
+        message = bind_line_message(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
 
     if message_text == "異常總表":
         message = summary(line_user_id)
