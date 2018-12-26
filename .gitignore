@@ -1,6 +1,12 @@
 # Flask config
 config.py
 
+# venv
+venv/
+
+# ini
+*.ini
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
