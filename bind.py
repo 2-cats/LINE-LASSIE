@@ -3,11 +3,14 @@ LINE account with Goodlinker AWS user
 
 Created at 2018/12/26 by Eric
 '''
+import datetime
+
 import requests
 from flask import Flask
 from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
 
 import config
+from rds import connect
 
 app = Flask(__name__)
 
@@ -45,36 +48,24 @@ def query_user_data(email, phone, line_user_id):
     for user_item in user_items:
         if user_item['email'] == email and user_item['phone'] == phone:
             if not check_line_user_id_exist(user_item['username']):
-                result = bind_line_user_id(user_item['username'], line_user_id)
+                bind_line_user_id(user_item['username'], line_user_id)
                 return 'success'
     return 'fail'
 
 def check_line_user_id_exist(username):
-    headers = {
-        'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-        'Authorization': app.config['SENSOR_LIVE_TOKEN']
-    }
-    data = requests.get(''.join(['https://api.sensor.live/api/projects/', app.config['SENSOR_LIVE_PROJECT_ID'] ,'/end_users/', str(username)]), headers=headers)
-    query_data = data.json()
-    user_attributes = query_data["user_attributes"]
-    for user_attribute in user_attributes:
-        if user_attribute['name'] == "custom:line_id_1":
-            return True
+    database = connect()
+    cursor = database.cursor()
+    args = (username,)
+    cursor.execute("SELECT line_user_id FROM users WHERE aws_username =  %s", args)
+    result = cursor.fetchone()
+    if result:
+        return True
     return False
 
 def bind_line_user_id(username, line_user_id):
-    headers = {
-        'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-        'Authorization': app.config['SENSOR_LIVE_TOKEN']
-    }
-    json={
-        "attributes":[
-            {
-                "name": "custom:line_id_1",
-                "value": line_user_id
-            }
-        ]
-    }
-    data = requests.put(''.join(['https://api.sensor.live/api/projects/', app.config['SENSOR_LIVE_PROJECT_ID'] ,'/end_users/', str(username)]), headers=headers, json=json)
-    query_data = data.json()
-    return 'success'
+    database = connect()
+    cursor = database.cursor()
+    args = (line_user_id, username,datetime.datetime.now())
+    cursor.execute("INSERT INTO users(line_user_id, aws_username, created_at) VALUES (%s,%s,%s)", args)
+    database.commit()
+    database.close()
