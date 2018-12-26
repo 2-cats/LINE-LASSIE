@@ -34,7 +34,8 @@ def line_bind_phone_view():
 def line_bind_view():
     email = request.values['email']
     phone = request.values['phone']
-    check_result = check_bind_result(email, phone)
+    line_user_id = request.values['line_user_id']
+    check_result = check_bind_result(email, phone, line_user_id)
     return render_template('line/bind_check.html', check_result = check_result)
 
 @app.route("/callback", methods=['POST'])
