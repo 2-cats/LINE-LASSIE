@@ -3,8 +3,15 @@ LINE account with Goodlinker AWS user
 
 Created at 2018/12/26 by Eric
 '''
+from flask import Flask
 from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
 
+import config
+
+app = Flask(__name__)
+
+# Get app config
+app.config.from_object(config)
 
 def bind_line_message(line_user_id):
     buttons_template = ButtonsTemplate(
@@ -13,7 +20,7 @@ def bind_line_message(line_user_id):
         actions=[
             URIAction(
                 label='點我進行綁定',
-                uri='line://app/1633151989-5BJ0B9EZ'
+                uri=app.config['BIND_LINE_LIFF_URL']
             )
         ])
     template_message = TemplateSendMessage(
