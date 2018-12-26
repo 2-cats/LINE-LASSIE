@@ -35,11 +35,17 @@
       <picture>
         <img class="rounded-circle img-fluid center-block" src="{{ url_for('static', filename='img/cancel_sm.png') }}" class="img-fluid img-thumbnail">
       </picture>
+      <div class="alert alert-danger" role="alert">
+      {{ check_result }}
+      </div>
       <div class="col-md-4 text-center"> 
         <form method='GET' action='/line/bind_email'>
           <div class="form-group">
             <div class="col-md-4 text-center"> 
-              <button type="submit" class="btn btn-link">重新註冊</button>
+              <button type="submit" class="btn btn-link">重新綁定？</button>
+            </div>
+            <div class="col-md-4 text-center"> 
+              <button id="closewindowbutton" type="submit" class="btn btn-link">關閉視窗</button>
             </div>
           </div>
         </form>
