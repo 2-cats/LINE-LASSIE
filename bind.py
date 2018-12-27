@@ -11,6 +11,7 @@ from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
 
 import config
 from rds import connect
+from richmenu import link_rm_to_user
 
 app = Flask(__name__)
 
@@ -58,6 +59,7 @@ def bind_line_user_id(username, line_user_id):
     cursor.execute("INSERT INTO users(line_user_id, aws_username, created_at) VALUES (%s,%s,%s)", args)
     database.commit()
     database.close()
+    link_rm_to_user(line_user_id)
 
 # Check user is bind
 def check_bind(line_user_id):
