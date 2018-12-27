@@ -3,8 +3,9 @@ import threading
 from flask import Flask, abort, render_template, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import (AudioMessage, ImageMessage, LocationMessage,
-                            MessageEvent, StickerMessage, TextMessage)
+from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
+                            LocationMessage, MessageEvent, StickerMessage,
+                            TextMessage, UnfollowEvent)
 
 import config
 from abnormal import summary
@@ -13,6 +14,8 @@ from contact import contact_us
 from device import device_list
 from error_message import alert_no_action_message, alert_to_bind_message
 from mqtt import client_loop
+from richmenu import unlink_rm
+from follow import follow_message
 
 app = Flask(__name__)
 
@@ -57,6 +60,24 @@ def callback():
         abort(400)
 
     return 'OK'
+
+
+@handler.add(FollowEvent)
+def handle_follow(event):
+    '''
+    Handle follow event
+    '''
+    message = follow_message(event.source.user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
+
+@handler.add(UnfollowEvent)
+def handle_unfollow(event):
+    '''
+    Handle follow event
+    '''
+    unlink_rm(event.source.user_id)
 
 # Handle MessageEvent
 @handler.add(MessageEvent, message=TextMessage)
