@@ -61,11 +61,6 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
-
-    if message_text == "綁定帳號":
-        message = bind_line_message(line_user_id)
-        line_bot_api.reply_message(event.reply_token, message)
-
     if message_text == "異常總表":
         message = summary(line_user_id)
         line_bot_api.reply_message(event.reply_token, message)
