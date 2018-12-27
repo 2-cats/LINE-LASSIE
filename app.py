@@ -7,7 +7,7 @@ from linebot.models import MessageEvent, TextMessage
 
 import config
 from abnormal import summary
-from bind import bind_line_message, check_bind_result
+from bind import bind_line_message, bind_user
 from mqtt import client_loop
 
 app = Flask(__name__)
@@ -35,7 +35,7 @@ def line_bind_view():
     email = request.values['email']
     phone = request.values['phone']
     line_user_id = request.values['line_user_id']
-    check_result = check_bind_result(email, phone, line_user_id)
+    check_result = bind_user(email, phone, line_user_id)
     return render_template('line/bind_check.html', check_result = check_result)
 
 @app.route("/callback", methods=['POST'])

@@ -33,7 +33,7 @@ def bind_line_message(line_user_id):
     )
     return template_message
 
-def check_bind_result(email, phone, line_user_id):
+def bind_user(email, phone, line_user_id):
     check_result = query_user_data(email, phone, line_user_id)
     return check_result
 
