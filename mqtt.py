@@ -11,14 +11,16 @@ from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
 from user import username_to_line_user_id
 import config
 
-#MQTT
-HOST = "m15.cloudmqtt.com"
-PORT = 17407
+
 
 app = Flask(__name__)
 
 # Get app config
 app.config.from_object(config)
+
+#MQTT
+HOST = app.config['MQTT_HOSTNAME']
+PORT = app.config['MQTT_PORT']
 
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 # Channel Secret
@@ -28,7 +30,7 @@ handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
 def client_loop():
     client_id = time.strftime('%Y%m%d%H%M%S',time.localtime(time.time()))
     client = mqtt.Client(client_id)    #client_id不能重复，所以使用当前时间
-    client.username_pw_set("eycjuarq", "EluqSNPot8X2")  #必须设置，否则会返回「Connected with result code 4」
+    client.username_pw_set(app.config['MQTT_USERNAME'], app.config['MQTT_PASSWORD'])  #必须设置，否则会返回「Connected with result code 4」
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(HOST, PORT, 60)
