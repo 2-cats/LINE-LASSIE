@@ -7,7 +7,7 @@ from linebot.models import MessageEvent, TextMessage
 
 import config
 from abnormal import summary
-from bind import bind_line_message, bind_user, check_bind
+from bind import bind_user, check_bind
 from mqtt import client_loop
 
 app = Flask(__name__)
