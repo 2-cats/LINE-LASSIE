@@ -5,7 +5,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
                             LocationMessage, MessageEvent, StickerMessage,
-                            TextMessage, UnfollowEvent)
+                            TextMessage, TextSendMessage, UnfollowEvent)
 
 import config
 from abnormal import summary
@@ -13,9 +13,9 @@ from bind import bind_user, check_bind
 from contact import contact_us
 from device import device_list
 from error_message import alert_no_action_message, alert_to_bind_message
+from follow import follow_message
 from mqtt import client_loop
 from richmenu import unlink_rm
-from follow import follow_message
 
 app = Flask(__name__)
 
@@ -86,6 +86,11 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
+
+    if message_text == "get_me_line_user_id":
+        message = TextSendMessage(text=str(line_user_id))
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
     # Check user is bind
     if check_bind(line_user_id):
