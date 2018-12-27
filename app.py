@@ -3,11 +3,15 @@ import threading
 from flask import Flask, abort, render_template, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage
+from linebot.models import (AudioMessage, ImageMessage, LocationMessage,
+                            MessageEvent, StickerMessage, TextMessage)
 
 import config
 from abnormal import summary
 from bind import bind_user, check_bind
+from contact import contact_us
+from device import device_list
+from error_message import alert_no_action_message, alert_to_bind_message
 from mqtt import client_loop
 
 app = Flask(__name__)
@@ -64,9 +68,60 @@ def handle_message(event):
 
     # Check user is bind
     if check_bind(line_user_id):
-        if message_text == "異常總表":
+        if message_text == "異常總覽":
             message = summary(line_user_id)
             line_bot_api.reply_message(event.reply_token, message)
+            return 0
+        if message_text == "聯絡我們":
+            message = contact_us(line_user_id)
+            line_bot_api.reply_message(event.reply_token, message)
+            return 0
+        if message_text == "設備清單":
+            message = device_list(line_user_id)
+            line_bot_api.reply_message(event.reply_token, message)
+            return 0
+        message = alert_no_action_message(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
+    message = alert_to_bind_message(line_user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
+# Handle location message event
+@handler.add(MessageEvent, message=LocationMessage)
+def handle_loaction_message(event):
+    """"
+    Handle location message Event.
+    """
+    line_user_id = event.source.user_id
+    message = alert_no_action_message(line_user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
+# Handle image message event
+@handler.add(MessageEvent, message=ImageMessage)
+def handle_image_message(event):
+    line_user_id = event.source.user_id
+    message = alert_no_action_message(line_user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
+# Handle audio message event
+@handler.add(MessageEvent, message=AudioMessage)
+def handle_audio_message(event):
+    line_user_id = event.source.user_id
+    message = alert_no_action_message(line_user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
+# Handle sticker message event
+@handler.add(MessageEvent, message=StickerMessage)
+def handle_sticker_message(event):
+    line_user_id = event.source.user_id
+    message = alert_no_action_message(line_user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
 
 if __name__ == "__main__":
     threading.Thread(target=client_loop).start()
