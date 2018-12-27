@@ -58,10 +58,11 @@ def check_line_user_id_exist(username):
     args = (username,)
     cursor.execute("SELECT line_user_id FROM users WHERE aws_username =  %s", args)
     result = cursor.fetchone()
+    database.close()
     if result:
         return True
     return False
-    database.close()
+    
 
 def bind_line_user_id(username, line_user_id):
     database = connect()
