@@ -7,7 +7,7 @@ from linebot.models import MessageEvent, TextMessage
 
 import config
 from abnormal import summary
-from bind import bind_line_message, bind_user
+from bind import bind_line_message, bind_user, check_bind
 from mqtt import client_loop
 
 app = Flask(__name__)
@@ -61,9 +61,12 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
-    if message_text == "異常總表":
-        message = summary(line_user_id)
-        line_bot_api.reply_message(event.reply_token, message)
+
+    # Check user is bind
+    if check_bind(line_user_id):
+        if message_text == "異常總表":
+            message = summary(line_user_id)
+            line_bot_api.reply_message(event.reply_token, message)
 
 if __name__ == "__main__":
     threading.Thread(target=client_loop).start()
