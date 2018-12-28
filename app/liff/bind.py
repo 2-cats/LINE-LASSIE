@@ -10,7 +10,9 @@ from flask import Flask
 from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
 
 import config
-from .rds import connect
+
+from .. import db
+from ..models import User
 from .richmenu import link_rm_to_user
 
 app = Flask(__name__)
@@ -41,22 +43,14 @@ def query_user_data(email, phone, line_user_id):
 
 # Check aws_username is in RDS table: USERS
 def check_line_user_id_exist(username):
-    database = connect()
-    cursor = database.cursor()
-    args = (username,)
-    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name =  %s", args)
-    result = cursor.fetchone()
-    database.close()
-    if result:
+    user = User.query.filter_by(aws_user_name=username).first()
+    if user:
         return True
     return False
     
 # Bind user to RDS table: USERS
 def bind_line_user_id(username, line_user_id):
-    database = connect()
-    cursor = database.cursor()
-    args = (line_user_id, username, datetime.datetime.now())
-    cursor.execute("INSERT INTO users(line_user_id, aws_user_name, created_at) VALUES (%s,%s,%s)", args)
-    database.commit()
-    database.close()
+    user = User(aws_user_name=username, line_user_id=line_user_id)
+    db.session.add(user)
+    db.session.commit()
     link_rm_to_user(line_user_id)

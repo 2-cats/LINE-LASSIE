@@ -17,7 +17,6 @@ from .device import device_list
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message
 from .mqtt import lassie_alarm_message
-from .rds import connect
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -43,7 +42,7 @@ def handle_connect(client, userdata, flags, rc):
 def handle_mqtt_message(client, userdata, message):
     payload = message.payload.decode()
     lassie_alarm_message(json.loads(payload))
-    
+
 
 @chatbot.route("/callback", methods=['POST'])
 def callback():

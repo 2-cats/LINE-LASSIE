@@ -8,7 +8,6 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
 from . import liff
 from .. import db
 from .bind import bind_user
-from .rds import connect
 from .richmenu import unlink_rm
 
 app = Flask(__name__, instance_relative_config=True)
