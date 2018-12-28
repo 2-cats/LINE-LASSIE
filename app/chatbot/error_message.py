@@ -5,10 +5,8 @@ from linebot.models import (FlexSendMessage, BoxComponent, BubbleContainer, Butt
 
 import config
 
-app = Flask(__name__)
-
-# Get app config
-app.config.from_object(config)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
 def alert_to_bind_message(line_user_id):
     buttons_template = ButtonsTemplate(

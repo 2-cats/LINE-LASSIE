@@ -6,10 +6,8 @@ import pymysql
 import config
 from flask import Flask
 
-app = Flask(__name__)
-
-# Get app config
-app.config.from_object(config)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
 def connect():
     '''

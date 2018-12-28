@@ -1,4 +1,4 @@
-from rds import connect
+from .rds import connect
 
 def username_to_line_user_id(username):
     database = connect()

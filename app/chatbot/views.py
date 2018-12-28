@@ -1,51 +1,27 @@
-import threading
-
-from flask import Flask, abort, render_template, request
+from flask import Flask, abort, current_app, render_template, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
                             LocationMessage, MessageEvent, StickerMessage,
                             TextMessage, TextSendMessage, UnfollowEvent)
 
-import config
-from abnormal import summary
-from bind import bind_user, check_bind
-from contact import contact_us
-from device import device_list
-from error_message import alert_no_action_message, alert_to_bind_message
-from follow import follow_message
-from mqtt import client_loop
-from richmenu import unlink_rm
+from . import chatbot
+from .. import db
+from .abnormal import summary
+from .bind import check_bind
+from .contact import contact_us
+from .device import device_list
+from .error_message import alert_no_action_message, alert_to_bind_message
+from .follow import follow_message
+from .mqtt import client_loop
+from .rds import connect
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
+line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
+handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
-# Get app config
-app.config.from_object(config)
-
-# Channel Access Token
-line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
-# Channel Secret
-handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
-
-# LIFF
-@app.route("/line/bind_email", methods=['GET'])
-def line_bind_email_view():
-    return render_template('line/bind_email.html')
-
-@app.route("/line/bind_phone", methods=['POST'])
-def line_bind_phone_view():
-    email = request.values['email']
-    return render_template('line/bind_phone.html', email = email)
-
-@app.route("/line/bind_check", methods=['POST'])
-def line_bind_view():
-    email = request.values['email']
-    phone = request.values['phone']
-    line_user_id = request.values['line_user_id']
-    check_result = bind_user(email, phone, line_user_id)
-    return render_template('line/bind_check.html', check_result = check_result)
-
-@app.route("/callback", methods=['POST'])
+@chatbot.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
@@ -70,14 +46,6 @@ def handle_follow(event):
     message = follow_message(event.source.user_id)
     line_bot_api.reply_message(event.reply_token, message)
     return 0
-
-
-@handler.add(UnfollowEvent)
-def handle_unfollow(event):
-    '''
-    Handle follow event
-    '''
-    unlink_rm(event.source.user_id)
 
 # Handle MessageEvent
 @handler.add(MessageEvent, message=TextMessage)
@@ -147,8 +115,3 @@ def handle_sticker_message(event):
     message = alert_no_action_message(line_user_id)
     line_bot_api.reply_message(event.reply_token, message)
     return 0
-
-
-if __name__ == "__main__":
-    threading.Thread(target=client_loop).start()
-    app.run()
