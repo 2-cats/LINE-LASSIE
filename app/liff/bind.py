@@ -44,7 +44,7 @@ def check_line_user_id_exist(username):
     database = connect()
     cursor = database.cursor()
     args = (username,)
-    cursor.execute("SELECT line_user_id FROM users WHERE aws_username =  %s", args)
+    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name =  %s", args)
     result = cursor.fetchone()
     database.close()
     if result:
@@ -56,7 +56,7 @@ def bind_line_user_id(username, line_user_id):
     database = connect()
     cursor = database.cursor()
     args = (line_user_id, username, datetime.datetime.now())
-    cursor.execute("INSERT INTO users(line_user_id, aws_username, created_at) VALUES (%s,%s,%s)", args)
+    cursor.execute("INSERT INTO users(line_user_id, aws_user_name, created_at) VALUES (%s,%s,%s)", args)
     database.commit()
     database.close()
     link_rm_to_user(line_user_id)
