@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 
+import coverage
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Shell
 
@@ -8,10 +9,8 @@ from app import create_app, db
 from app.models import User
 
 COV = None
-if os.environ.get('FLASK_COVERAGE'):
-    import coverage
-    COV = coverage.coverage(branch=True, include='app/*')
-    COV.start()
+COV = coverage.coverage(branch=True, include='app/*')
+COV.start()
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
@@ -31,16 +30,16 @@ def test(coverage=False):
     import unittest
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
-    if COV:
-        COV.stop()
-        COV.save()
-        print('Coverage Summary:')
-        COV.report()
-        basedir = os.path.abspath(os.path.dirname(__file__))
-        covdir = os.path.join(basedir, 'tmp/coverage')
-        COV.html_report(directory=covdir)
-        print('HTML version: file://%s/index.html' % covdir)
-        COV.erase()
+
+    COV.stop()
+    COV.save()
+    print('\n\nCoverage Summary:')
+    COV.report()
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    covdir = os.path.join(basedir, 'tmp/coverage')
+    COV.html_report(directory=covdir)
+    print('HTML version: file://%s/index.html' % covdir)
+    COV.erase()
 
 @manager.command
 def profile(length=25, profile_dir=None):
