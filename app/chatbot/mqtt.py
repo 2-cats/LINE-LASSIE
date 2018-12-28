@@ -1,8 +1,6 @@
 import json
 import time
 
-import paho.mqtt.client as mqtt
-import paho.mqtt.publish as publish
 from flask import Flask
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
@@ -24,72 +22,58 @@ line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
 
 
-def client_loop():
-    client_id = time.strftime('%Y%m%d%H%M%S',time.localtime(time.time()))
-    client = mqtt.Client(client_id)    #client_id不能重复，所以使用当前时间
-    client.username_pw_set(app.config['MQTT_USERNAME'], app.config['MQTT_PASSWORD'])  #必须设置，否则会返回「Connected with result code 4」
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(HOST, PORT, 60)
-    client.loop_forever()
-    
-def on_connect(client, userdata, flags, rc):
-    client.subscribe("/line/gl1/lassie/alarm")
-    client.subscribe("/line/gl1/lassie/alarmlist")
-    
-def on_message(client, userdata, msg):
-    json_data=json.loads(msg.payload.decode("utf-8"))
-    if msg.topic == "/line/gl1/lassie/alarm":
-        push_id=username_to_line_user_id(json_data['u'])
+def lassie_alarm_message(mqtt_message):
 
-        if json_data['t'] == "counter":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if json_data['t'] == "lamp":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if json_data['t'] == "current":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if json_data['t'] == "state":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if json_data['t'] == "temperature":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "上下限為" , ":" , str(json_data['ra']['h']) , "及" , str(
-                json_data['ra']['l']) , "   " , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if json_data['t'] == "humidity":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "上下限為" , ":" , str(json_data['ra']['h']) , "及" , str(
-                json_data['ra']['l']) , "   " , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        if json_data['t'] == "color":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(json_data['url']),
-                                                                     preview_image_url=str(json_data['url'])))
-        if json_data['t'] == "detector":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(json_data['url']),
-                                                                     preview_image_url=str(json_data['url'])))
-        if json_data['t'] == "timer":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "規則為" , ":" , str(json_data['r']) , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(json_data['url']),
-                                                                     preview_image_url=str(json_data['url'])))
-        if json_data['t'] == "ocr":
-            thing_msg=(''.join(["您" , str(json_data['nt']) , "的" , str(json_data['ns']) , "於" , str(
-                json_data['time']) , "出現異常" , "   " , "上下限為" , ":" , str(json_data['ra']['h']) , "及" , str(
-                json_data['ra']['l']) , "   " , "異常值" , ":" , str(json_data['v'])]))
-            line_bot_api.push_message(push_id, TextSendMessage(text=thing_msg))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-            line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(json_data['url']),
-                                                                     preview_image_url=str(json_data['url'])))
+    push_id = username_to_line_user_id(mqtt_message['u'])
+
+    if mqtt_message['t'] == "counter":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+    if mqtt_message['t'] == "lamp":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+    if mqtt_message['t'] == "current":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+    if mqtt_message['t'] == "state":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+    if mqtt_message['t'] == "temperature":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "上下限為" , ":" , str(mqtt_message['ra']['h']) , "及" , str(
+            mqtt_message['ra']['l']) , "   " , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+    if mqtt_message['t'] == "humidity":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "上下限為" , ":" , str(mqtt_message['ra']['h']) , "及" , str(
+            mqtt_message['ra']['l']) , "   " , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+    if mqtt_message['t'] == "color":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
+                                                                    preview_image_url=str(mqtt_message['url'])))
+    if mqtt_message['t'] == "detector":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
+                                                                    preview_image_url=str(mqtt_message['url'])))
+    if mqtt_message['t'] == "timer":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
+                                                                    preview_image_url=str(mqtt_message['url'])))
+    if mqtt_message['t'] == "ocr":
+        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
+            mqtt_message['time']) , "出現異常" , "   " , "上下限為" , ":" , str(mqtt_message['ra']['h']) , "及" , str(
+            mqtt_message['ra']['l']) , "   " , "異常值" , ":" , str(mqtt_message['v'])]))
+        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
+        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
+                                                                    preview_image_url=str(mqtt_message['url'])))

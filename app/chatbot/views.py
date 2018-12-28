@@ -1,4 +1,7 @@
+import json
+
 from flask import Flask, abort, current_app, render_template, request
+from flask_mqtt import Mqtt
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
@@ -13,13 +16,34 @@ from .contact import contact_us
 from .device import device_list
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message
-from .mqtt import client_loop
+from .mqtt import lassie_alarm_message
 from .rds import connect
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
+
+# LINE ACCESS
 line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
+
+# MQTT
+app.config['MQTT_BROKER_URL'] = app.config["MQTT_HOSTNAME"]
+app.config['MQTT_BROKER_PORT'] = app.config["MQTT_PORT"]
+app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
+app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
+mqtt = Mqtt(app)
+
+# Subscribe MQTT: Lassie/alarm
+@mqtt.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    mqtt.subscribe('/line/gl1/lassie/alarm')
+
+# Handle MQTT message
+@mqtt.on_message()
+def handle_mqtt_message(client, userdata, message):
+    payload = message.payload.decode()
+    lassie_alarm_message(json.loads(payload))
+    
 
 @chatbot.route("/callback", methods=['POST'])
 def callback():
