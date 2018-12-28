@@ -8,15 +8,12 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
                             ImageComponent, ImageSendMessage, MessageAction,
                             MessageEvent, TextComponent, TextSendMessage)
-from user import username_to_line_user_id
+from .user import username_to_line_user_id
 import config
 
 
-
-app = Flask(__name__)
-
-# Get app config
-app.config.from_object(config)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
 #MQTT
 HOST = app.config['MQTT_HOSTNAME']

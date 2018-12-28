@@ -3,10 +3,8 @@ from linebot import LineBotApi
 
 import config
 
-app = Flask(__name__)
-
-# Get app config
-app.config.from_object(config)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 

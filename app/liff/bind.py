@@ -10,8 +10,8 @@ from flask import Flask
 from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
 
 import config
-from rds import connect
-from richmenu import link_rm_to_user
+from .rds import connect
+from .richmenu import link_rm_to_user
 
 app = Flask(__name__)
 
@@ -60,15 +60,3 @@ def bind_line_user_id(username, line_user_id):
     database.commit()
     database.close()
     link_rm_to_user(line_user_id)
-
-# Check user is bind
-def check_bind(line_user_id):
-    database = connect()
-    cursor = database.cursor()
-    args = (line_user_id,)
-    cursor.execute("SELECT aws_username FROM users WHERE line_user_id =  %s", args)
-    result = cursor.fetchone()
-    database.close()
-    if result:
-        return True
-    return False
