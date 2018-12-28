@@ -1,19 +1,10 @@
-from .rds import connect
+from ..models import User
+
 
 def username_to_line_user_id(username):
-    database = connect()
-    cursor = database.cursor()
-    args = (username,)
-    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name =  %s", args)
-    result = cursor.fetchone()
-    database.close()
-    return result[0]
+    user = User.query.filter_by(aws_user_name=username).first()
+    return user.line_user_id
 
 def line_user_id_to_username(line_user_id):
-    database = connect()
-    cursor = database.cursor()
-    args = (line_user_id,)
-    cursor.execute("SELECT aws_user_name FROM users WHERE line_user_id =  %s", args)
-    result = cursor.fetchone()
-    database.close()
-    return result[0]
+    user = User.query.filter_by(line_user_id=line_user_id).first()
+    return user.aws_user_name
