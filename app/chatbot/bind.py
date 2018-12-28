@@ -12,7 +12,7 @@ def check_bind(line_user_id):
     database = connect()
     cursor = database.cursor()
     args = (line_user_id,)
-    cursor.execute("SELECT aws_username FROM users WHERE line_user_id =  %s", args)
+    cursor.execute("SELECT aws_user_name FROM users WHERE line_user_id =  %s", args)
     result = cursor.fetchone()
     database.close()
     if result:
