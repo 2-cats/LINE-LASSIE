@@ -1,6 +1,6 @@
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, TextComponent)
-from .richmenu import link_rm_to_guest
+from ..models import User
 
 def follow_message(line_user_id):
     bubble_template = BubbleContainer(
@@ -27,4 +27,5 @@ def follow_message(line_user_id):
     return message
 
 def unfollow(line_user_id):
-    link_rm_to_guest(line_user_id)
+    user = User.query.filter_by(line_user_id=line_user_id).first()
+    User.link_rm_to_guest(user)

@@ -13,7 +13,6 @@ import config
 
 from .. import db
 from ..models import User
-from .richmenu import link_rm_to_user
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -76,4 +75,4 @@ def bind_line_user_id(username, line_user_id):
     user = User(aws_user_name=username, line_user_id=line_user_id)
     db.session.add(user)
     db.session.commit()
-    link_rm_to_user(line_user_id)
+    User.link_rm_to_user(user)
