@@ -6,9 +6,10 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
                             ImageComponent, ImageSendMessage, MessageAction,
                             MessageEvent, TextComponent, TextSendMessage)
-from .user import username_to_line_user_id
+
 import config
 
+from ..models import User
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -24,7 +25,9 @@ handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
 
 def lassie_alarm_message(mqtt_message):
 
-    push_id = username_to_line_user_id(mqtt_message['u'])
+    # Convert username to line_user_id
+    user = User.query.filter_by(aws_user_name=mqtt_message['u']).first()
+    push_id = user.line_user_id
 
     if mqtt_message['t'] == "counter":
         thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
