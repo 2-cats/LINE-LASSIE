@@ -15,7 +15,7 @@ from .bind import check_bind
 from .contact import contact_us
 from .device import device_list
 from .error_message import alert_no_action_message, alert_to_bind_message
-from .follow import follow_message
+from .follow import follow_message, unfollow
 from .mqtt import lassie_alarm_message
 
 app = Flask(__name__, instance_relative_config=True)
@@ -67,6 +67,15 @@ def handle_follow(event):
     Handle follow event
     '''
     message = follow_message(event.source.user_id)
+    line_bot_api.reply_message(event.reply_token, message)
+    return 0
+
+@handler.add(UnfollowEvent)
+def handle_unfollow(event):
+    '''
+    Handle unfollow event
+    '''
+    message = unfollow(event.source.user_id)
     line_bot_api.reply_message(event.reply_token, message)
     return 0
 
