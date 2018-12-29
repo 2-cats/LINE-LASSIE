@@ -23,7 +23,7 @@ def follow_message(line_user_id):
         )
     )
     message = FlexSendMessage(
-        alt_text='抱歉，我聽不懂指令', contents=bubble_template)
+        alt_text='歡迎您的加入', contents=bubble_template)
     return message
 
 def unfollow(line_user_id):
