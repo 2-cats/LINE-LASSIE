@@ -8,8 +8,8 @@ app.config.from_pyfile('config.py')
 
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 
-def link_rm_to_user(line_user_id):
+def link_rm_to_guest(line_user_id):
     '''
-    Link rich menu to user
+    Link rich menu to guest
     '''
-    line_bot_api.link_rich_menu_to_user(line_user_id, app.config['USER_RICH_MENU_ID'])
+    line_bot_api.link_rich_menu_to_user(line_user_id, app.config['GUEST_RICH_MENU_ID'])
