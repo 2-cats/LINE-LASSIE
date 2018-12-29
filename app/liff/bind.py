@@ -15,34 +15,46 @@ from .. import db
 from ..models import User
 from .richmenu import link_rm_to_user
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
-# Get app config
-app.config.from_object(config)
 
 # Try bind user between LINE and AWS Cognito
 def bind_user(email, phone, line_user_id):
+    phone = phone.replace('0', '+886')
     check_result = query_user_data(email, phone, line_user_id)
     return check_result
 
 # Query user data in Cognito
 def query_user_data(email, phone, line_user_id):
+    additional_info_type = "phone"
     headers = {
         'Account': app.config['SENSOR_LIVE_ACCOUNT'],
         'Authorization': app.config['SENSOR_LIVE_TOKEN']
     }
     data = requests.get(''.join(['https://api.sensor.live/api/projects/', app.config['SENSOR_LIVE_PROJECT_ID'] ,'/end_users/list']), headers=headers)
     query_data = data.json()
-    for user_item in query_data["items"]:
-        if (str(user_item['email']) == str(email)) and (str(user_item['phone_number']) == str(phone)):
-            if not check_line_user_id_exist(user_item['username']):
-                bind_line_user_id(user_item['username'], line_user_id)
-                return 'success'
-            return 'fail: User has been registered'
+    for item in query_data['items']:
+        if item:
+            if 'phone' in item:
+                if item['phone'] == phone:
+                    for user_attribute in item['user_attributes']:
+                        if user_attribute['name'] == 'custom:additional_info':
+                            if user_attribute['value'] == email:
+                                bind_line_user_id(item['username'], line_user_id)
+                                return 'success'
+            if 'email' in item:
+                if item['email'] == email:
+                    for user_attribute in item['user_attributes']:
+                        if user_attribute['name'] == 'custom:additional_info':
+                            if user_attribute['value'] == phone:
+                                bind_line_user_id(item['username'], line_user_id)
+                                return 'success'
     return 'fail: User not found'
 
 # Check aws_username is in RDS table: USERS
 def check_line_user_id_exist(username):
+
     user = User.query.filter_by(aws_user_name=username).first()
     if user:
         return True
