@@ -1,6 +1,6 @@
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, TextComponent)
-
+from .richmenu import link_rm_to_guest
 
 def follow_message(line_user_id):
     bubble_template = BubbleContainer(
@@ -25,3 +25,6 @@ def follow_message(line_user_id):
     message = FlexSendMessage(
         alt_text='抱歉，我聽不懂指令', contents=bubble_template)
     return message
+
+def unfollow(line_user_id):
+    link_rm_to_guest(line_user_id)
