@@ -31,3 +31,7 @@ def line_bind_view():
     line_user_id = request.values['line_user_id']
     check_result = bind_user(email, phone, line_user_id)
     return render_template('line/bind_check.html', check_result = check_result)
+
+@liff.route("/line/daily_report", methods=['GET'])
+def line_daily_report():
+    return render_template('line/daily_report.html')
