@@ -1,6 +1,6 @@
 import json
-import time
 
+import pymysql
 from flask import Flask
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
@@ -9,14 +9,9 @@ from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
 
 import config
 
-from ..models import User
-
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-#MQTT
-HOST = app.config['MQTT_HOSTNAME']
-PORT = app.config['MQTT_PORT']
 
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 # Channel Secret
@@ -24,10 +19,8 @@ handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
 
 
 def lassie_alarm_message(mqtt_message):
-
     # Convert username to line_user_id
-    user = User.query.filter_by(aws_user_name=mqtt_message['u']).first()
-    push_id = user.line_user_id
+    push_id = username_to_line_user_id(mqtt_message['u'])
 
     if mqtt_message['t'] == "counter":
         thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
@@ -80,3 +73,18 @@ def lassie_alarm_message(mqtt_message):
         line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
         line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
                                                                     preview_image_url=str(mqtt_message['url'])))
+def username_to_line_user_id(username):
+    # Convert username to line_user_id
+    database = pymysql.connect(
+        app.config['DB_HOST'],
+        app.config['DB_USERNAME'],
+        app.config['DB_PASSWORD'],
+        app.config['DB_NAME'],
+        charset='utf8'
+    )
+    cursor = database.cursor()
+    args = (username,)
+    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name =  %s", args)
+    result = cursor.fetchone()
+    database.close()
+    return result[0]
