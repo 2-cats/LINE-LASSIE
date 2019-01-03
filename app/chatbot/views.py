@@ -13,7 +13,7 @@ from .. import db
 from .abnormal import summary
 from .bind import check_bind
 from .contact import contact_us
-from .device import device_list
+from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
 from .mqtt import lassie_alarm_message
@@ -102,8 +102,10 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, message)
             return 0
         if message_text == "設備清單":
-            message = device_list(line_user_id)
+            message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
             line_bot_api.reply_message(event.reply_token, message)
+            device_list_message(line_user_id)
+            
             return 0
         message = alert_no_action_message(line_user_id)
         line_bot_api.reply_message(event.reply_token, message)
