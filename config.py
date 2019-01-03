@@ -4,11 +4,6 @@ app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
 class Config:
-    DB_HOST = app.config['DB_HOST']
-    DB_USERNAME = app.config['DB_USERNAME']
-    DB_PASSWORD = app.config['DB_PASSWORD']
-    DB_NAME = app.config['DB_NAME']
-    DB_PORT = app.config['DB_PORT']
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     @staticmethod
     def init_app(app):
@@ -17,34 +12,16 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'.format(
-        Config.DB_USERNAME,
-        Config.DB_PASSWORD,
-        Config.DB_HOST,
-        Config.DB_PORT,
-        Config.DB_NAME
-    )
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'
 
 class TestingConfig(Config):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'.format(
-        Config.DB_USERNAME,
-        Config.DB_PASSWORD,
-        Config.DB_HOST,
-        Config.DB_PORT,
-        Config.DB_NAME
-    )
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'
 
 class ProductionConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'.format(
-        Config.DB_USERNAME,
-        Config.DB_PASSWORD,
-        Config.DB_HOST,
-        Config.DB_PORT,
-        Config.DB_NAME
-    )
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'
 
 config = {
     'development': DevelopmentConfig,
