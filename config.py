@@ -17,7 +17,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'.format(
         Config.DB_USERNAME,
         Config.DB_PASSWORD,
         Config.DB_HOST,
@@ -28,7 +28,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'.format(
         Config.DB_USERNAME,
         Config.DB_PASSWORD,
         Config.DB_HOST,
@@ -38,7 +38,7 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///chatbot.db'.format(
         Config.DB_USERNAME,
         Config.DB_PASSWORD,
         Config.DB_HOST,
