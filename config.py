@@ -16,7 +16,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = False
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(
         Config.DB_USERNAME,
         Config.DB_PASSWORD,
