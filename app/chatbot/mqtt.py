@@ -48,7 +48,7 @@ def lassie_alarm_message(mqtt_message):
                 margin='md',
                 contents=[
                     TextComponent(
-                        text=mqtt_message['nt'],
+                        text=mqtt_message['nt'] + ' 偵測到異常',
                         weight='bold',
                         wrap=False,
                         size='xl',
