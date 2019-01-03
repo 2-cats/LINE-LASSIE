@@ -100,7 +100,7 @@ def get_device_list_data(line_user_id):
             updated_at = datetime.datetime.strptime(thing_response_json['updated_at'], '%Y-%m-%d %H:%M:%S')
             updated_at_timedelta = updated_at + datetime.timedelta(seconds=thing_response_json['keep_alive'])  
             alive = '異常'
-            text_color = '#1DB446'
+            text_color = '#464646'
             if datetime.datetime.now() < updated_at_timedelta:
                 alive = '連接中'
                 text_color = '#1DB446'
