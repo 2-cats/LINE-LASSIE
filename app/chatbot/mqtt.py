@@ -1,78 +1,127 @@
-import json
-
 import pymysql
 from flask import Flask
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
-                            ImageComponent, ImageSendMessage, MessageAction,
-                            MessageEvent, TextComponent, TextSendMessage)
-
-import config
+                            ImageComponent, ImageSendMessage, TextComponent,IconComponent)
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
-# Channel Secret
-handler = WebhookHandler(app.config['LINE_CHANNEL_SECRET'])
-
+handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
 def lassie_alarm_message(mqtt_message):
-    # Convert username to line_user_id
     push_id = username_to_line_user_id(mqtt_message['u'])
+    unit = ''
+    if mqtt_message['t'] == 'counter':
+        unit = ' (次)'
+    if mqtt_message['t'] == 'lamp' or 'state' or 'color' or 'detector' or 'ocr':
+        unit = ' (偵測值)'
+    if mqtt_message['t'] == 'current':
+        unit = ' (mAh)'
+    if mqtt_message['t'] == 'temperature':
+        unit = ' (℃)'
+    if mqtt_message['t'] == 'humidity':
+        unit = ' (%)'
+    if mqtt_message['t'] == 'timer':
+        unit = ' (秒)'
+    message_list = []
+    message = ImageSendMessage(
+                                original_content_url=str(mqtt_message['url']),
+                                preview_image_url=str(mqtt_message['url'])
+                              )
+    message_list.append(message)
+    message = FlexSendMessage(
+                              alt_text='異常通知',
+                              contents=BubbleContainer(
+                                  hero=ImageComponent(
+                                      url='https://i.imgur.com/EzEglZZ.png',
+                                      size='full',
+                                      aspect_ratio='2:1',
+                                      aspect_mode='fit',
+                                      margin='none',
+                                  ),
+                                  body=BoxComponent(
+                                      layout='vertical',
+                                      flex=1,
+                                      spacing='md',
+                                      margin='md',
+                                      contents=[
+                                          TextComponent(
+                                              text=mqtt_message['nt'],
+                                              weight='bold',
+                                              wrap=False,
+                                              size='xl',
+                                              color='#464646',
+                                              flex=1,
+                                              margin='none',
+                                              align='center',
+                                              gravity='top'
+                                          ),
+                                          BoxComponent(
+                                              layout='vertical',
+                                              flex=1,
+                                              spacing='sm',
+                                              margin='md',
+                                              contents=[
+                                                  BoxComponent(
+                                                      layout='baseline',
+                                                      flex=1,
+                                                      spacing='sm',
+                                                      margin='md',
+                                                      contents=[
+                                                          IconComponent(
+                                                              aspect_ratio='1:1',
+                                                              margin='none',
+                                                              size='md',
+                                                              url='https://i.imgur.com/OoRVQey.png'
+                                                          ),
+                                                          TextComponent(
+                                                              text=mqtt_message['ns'],
+                                                              weight='bold',
+                                                              wrap=False,
+                                                              size='md',
+                                                              color='#464646',
+                                                              flex=0,
+                                                              margin='sm',
+                                                              align='start',
+                                                              gravity='top'
+                                                          ),
+                                                          TextComponent(
+                                                              text=str(mqtt_message['v']) + unit,
+                                                              weight='regular',
+                                                              wrap=False,
+                                                              size='sm',
+                                                              color='#000000',
+                                                              flex=1,
+                                                              margin='none',
+                                                              align='end',
+                                                              gravity='top'
+                                                          ),
+                                                      ]
+                                                  )
+                                              ]
+                                          ),
+                                          TextComponent(
+                                              text=mqtt_message['time'],
+                                              weight='regular',
+                                              wrap=True,
+                                              size='xs',
+                                              color='#aaaaaa',
+                                              flex=1,
+                                              margin='none',
+                                              align='end',
+                                              gravity='top'
+                                          ),
+                                      ]
+                                  )
+                              )
+                          )
+    message_list.append(message)
+    line_bot_api.push_message(push_id, message_list)
 
-    if mqtt_message['t'] == "counter":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-    if mqtt_message['t'] == "lamp":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-    if mqtt_message['t'] == "current":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-    if mqtt_message['t'] == "state":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-    if mqtt_message['t'] == "temperature":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "上下限為" , ":" , str(mqtt_message['ra']['h']) , "及" , str(
-            mqtt_message['ra']['l']) , "   " , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-    if mqtt_message['t'] == "humidity":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "上下限為" , ":" , str(mqtt_message['ra']['h']) , "及" , str(
-            mqtt_message['ra']['l']) , "   " , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-    if mqtt_message['t'] == "color":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
-                                                                    preview_image_url=str(mqtt_message['url'])))
-    if mqtt_message['t'] == "detector":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
-                                                                    preview_image_url=str(mqtt_message['url'])))
-    if mqtt_message['t'] == "timer":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "規則為" , ":" , str(mqtt_message['r']) , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
-                                                                    preview_image_url=str(mqtt_message['url'])))
-    if mqtt_message['t'] == "ocr":
-        thing_mqtt_message=(''.join(["您" , str(mqtt_message['nt']) , "的" , str(mqtt_message['ns']) , "於" , str(
-            mqtt_message['time']) , "出現異常" , "   " , "上下限為" , ":" , str(mqtt_message['ra']['h']) , "及" , str(
-            mqtt_message['ra']['l']) , "   " , "異常值" , ":" , str(mqtt_message['v'])]))
-        line_bot_api.push_message(push_id, TextSendMessage(text=thing_mqtt_message))  # 前提是要吃JSON訊息 才會有取ELEMEMT
-        line_bot_api.push_message(push_id, ImageSendMessage(original_content_url=str(mqtt_message['url']),
-                                                                    preview_image_url=str(mqtt_message['url'])))
+
+
 def username_to_line_user_id(username):
     # Convert username to line_user_id
     database = pymysql.connect(
@@ -80,7 +129,7 @@ def username_to_line_user_id(username):
         app.config['DB_USERNAME'],
         app.config['DB_PASSWORD'],
         app.config['DB_NAME'],
-        charset='utf8'
+        charset="utf8"
     )
     cursor = database.cursor()
     args = (username,)
