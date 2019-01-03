@@ -26,11 +26,12 @@ def lassie_alarm_message(mqtt_message):
     if mqtt_message['t'] == 'timer':
         unit = ' (秒)'
     message_list = []
-    message = ImageSendMessage(
-                                original_content_url=str(mqtt_message['url']),
-                                preview_image_url=str(mqtt_message['url'])
-                              )
-    message_list.append(message)
+    if mqtt_message['url'] != "":
+        message = ImageSendMessage(
+                                    original_content_url=str(mqtt_message['url']),
+                                    preview_image_url=str(mqtt_message['url'])
+                                  )
+        message_list.append(message)
     message = FlexSendMessage(
                               alt_text='異常通知',
                               contents=BubbleContainer(
