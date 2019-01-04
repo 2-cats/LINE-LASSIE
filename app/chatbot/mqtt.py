@@ -16,25 +16,25 @@ def lassie_alarm_message(mqtt_message):
     rule = ''
     if mqtt_message['t'] == 'counter':
         unit = ' (次)'
-        rule = '設定 : ' + str(mqtt_message['r'])
-    if mqtt_message['t'] == 'lamp' or 'state' or 'color' or 'detector':
+        rule = '設定 : ' + str(mqtt_message['r']) + ' 次'
+    elif (mqtt_message['t'] == 'lamp') or ( mqtt_message['t'] == 'state') or (mqtt_message['t'] == 'color') or (mqtt_message['t'] == 'detector'):
         unit = ' (偵測值)'
         rule = '設定 : ' + str(mqtt_message['r'])
-    if mqtt_message['t'] == 'current':
+    elif mqtt_message['t'] == 'current':
         unit = ' (mAh)'
-        rule = '設定 : ' + str(mqtt_message['r'])
-    if mqtt_message['t'] == 'temperature':
+        rule = '設定 : ' + str(mqtt_message['r']) + ' mAh'
+    elif mqtt_message['t'] == 'temperature':
         unit = ' (℃)'
-        rule = '上下限為 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l'])
-    if mqtt_message['t'] == 'humidity':
+        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l']) + ' ℃'
+    elif mqtt_message['t'] == 'humidity':
         unit = ' (%)'
-        rule = '上下限為 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l'])
-    if mqtt_message['t'] == 'timer':
+        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l']) + ' %'
+    elif mqtt_message['t'] == 'timer':
         unit = ' (秒)'
-        rule = '設定 : ' + str(mqtt_message['r'])
-    if mqtt_message['t'] == 'ocr':
+        rule = '設定 : ' + str(mqtt_message['r']) + ' 秒'
+    elif mqtt_message['t'] == 'ocr':
         unit = '(偵測值)'
-        rule = '上下限為 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l'])
+        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l'])
     message_list = []
     if mqtt_message['url'] != "":
         message = ImageSendMessage(
