@@ -37,21 +37,24 @@ def query_user_data(email, phone, line_user_id):
         query_data = data.json()
         for item in query_data['items']:
             if item:
-                if check_username_exist(item['username']):
-                    return 'fail: User has been bind.'
-                else:
-                    if 'phone' in item:
-                        if item['phone'] == phone:
-                            for user_attribute in item['user_attributes']:
-                                if user_attribute['name'] == 'custom:additional_info':
-                                    if user_attribute['value'] == email:
+                if 'phone' in item:
+                    if item['phone'] == phone:
+                        for user_attribute in item['user_attributes']:
+                            if user_attribute['name'] == 'custom:additional_info':
+                                if user_attribute['value'] == email:
+                                    if check_username_exist(item['username']):
+                                        return 'fail: User has been bind.'
+                                    else:
                                         bind_line_user_id(item['username'], line_user_id)
                                         return 'success'
-                    if 'email' in item:
-                        if item['email'] == email:
-                            for user_attribute in item['user_attributes']:
-                                if user_attribute['name'] == 'custom:additional_info':
-                                    if user_attribute['value'] == phone:
+                if 'email' in item:
+                    if item['email'] == email:
+                        for user_attribute in item['user_attributes']:
+                            if user_attribute['name'] == 'custom:additional_info':
+                                if user_attribute['value'] == phone:
+                                    if check_username_exist(item['username']):
+                                        return 'fail: User has been bind.'
+                                    else:
                                         bind_line_user_id(item['username'], line_user_id)
                                         return 'success'
         return 'fail: User not found' 
@@ -59,16 +62,16 @@ def query_user_data(email, phone, line_user_id):
 # Check aws_username is in RDS table: USERS
 def check_username_exist(username):
     user = User.query.filter_by(aws_user_name=username).first()
-    if user:
-        return True
-    return False
+    if user is None:
+        return False
+    return True
 
 # Check line_user_id is in RDS table: USERS
 def check_line_user_id_exist(line_user_id):
     user = User.query.filter_by(line_user_id=line_user_id).first()
-    if user:
-        return True
-    return False
+    if user is None:
+        return False
+    return True
     
 # Bind user to RDS table: USERS
 def bind_line_user_id(username, line_user_id):
