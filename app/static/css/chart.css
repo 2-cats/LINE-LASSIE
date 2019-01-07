@@ -1,0 +1,16 @@
+.c3-axis-y text 
+{
+  font-size: 20px; /* change the axis-y text font size */
+}
+
+.c3-axis-x text {
+  font-size: 30px; /* change the axis-x text font size */
+}
+
+table.c3-tooltip{
+  font-size:150px; /* change the tooltip text font size */
+}
+
+.c3-legend-item text {
+  font-size: 30px; /* change the legend-item text font size */
+}

@@ -72,7 +72,7 @@ def check_line_user_id_exist(line_user_id):
     if user is None:
         return False
     return True
-    
+
 # Bind user to RDS table: USERS
 def bind_line_user_id(username, line_user_id):
     user = User(aws_user_name=username, line_user_id=line_user_id)
