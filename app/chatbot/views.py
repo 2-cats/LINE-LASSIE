@@ -5,8 +5,9 @@ from flask_mqtt import Mqtt
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
-                            LocationMessage, MessageEvent, StickerMessage,
-                            TextMessage, TextSendMessage, UnfollowEvent)
+                            LocationMessage, MessageEvent, PostbackEvent,
+                            StickerMessage, TextMessage, TextSendMessage,
+                            UnfollowEvent)
 
 from . import chatbot
 from .. import db
@@ -113,6 +114,18 @@ def handle_message(event):
     message = alert_to_bind_message(line_user_id)
     line_bot_api.reply_message(event.reply_token, message)
     return 0
+
+# Postback Event
+@handler.add(PostbackEvent)
+def handle_postback(event):
+    line_user_id = event.source.user_id
+    # data="action, var1, var2, ... ,varN"
+    # Convet to postback_data: [action, var1, var2, ... ,varN]
+    postback_data = event.postback.data.split(",") 
+    if postback_data[0] == "abnormal":
+        message = summary(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle location message event
 @handler.add(MessageEvent, message=LocationMessage)
