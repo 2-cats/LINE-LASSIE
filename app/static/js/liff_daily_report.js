@@ -64,10 +64,6 @@ function generateChart(){
     /* Start pie chart */
     // Generate pie chart
     var pie_chart = c3.generate({
-        size: {
-            height: 2400,
-            width: 4800
-        },
         bindto: '#pie_chart',
         padding: {
             bottom: 40
