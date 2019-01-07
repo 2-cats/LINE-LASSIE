@@ -98,7 +98,7 @@ def handle_message(event):
             message = summary(line_user_id)
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-        if message_text == "聯絡客服":
+        if message_text == "聯絡我們":
             message = contact_us(line_user_id)
             line_bot_api.reply_message(event.reply_token, message)
             return 0

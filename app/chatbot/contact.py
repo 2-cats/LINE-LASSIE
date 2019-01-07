@@ -29,10 +29,15 @@ def contact_us(line_user_id):
         ),
         footer=BoxComponent(
             layout='vertical',
-            flex=1,
-            spacing='sm',
             margin='md',
             contents=[
+                ButtonComponent(
+                    style='link',
+                    action=URIAction(
+                        label='LINE@ 客服',
+                        uri='line://ti/p/@gtb6688a'
+                    )
+                ),
                 ButtonComponent(
                     style='link',
                     action=URIAction(
