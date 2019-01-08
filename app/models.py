@@ -30,10 +30,16 @@ class User(UserMixin, db.Model):
         '''
         Link rich menu to guest
         '''
-        line_bot_api.link_rich_menu_to_user(self.line_user_id, app.config['GUEST_RICH_MENU_ID'])
+        try:
+            line_bot_api.link_rich_menu_to_user(self.line_user_id, app.config['GUEST_RICH_MENU_ID'])
+        except:
+            pass
 
     def link_rm_to_user(self):
         '''
         Link rich menu to user
         '''
-        line_bot_api.link_rich_menu_to_user(self.line_user_id, app.config['USER_RICH_MENU_ID'])
+        try:
+            line_bot_api.link_rich_menu_to_user(self.line_user_id, app.config['USER_RICH_MENU_ID'])
+        except:
+            pass
