@@ -4,12 +4,12 @@ import unittest
 import responses
 from linebot import LineBotApi
 
-from app.chatbot.follow import follow_message
+from app.chatbot.follow import follow_message, unfollow
 
 
 class BasicsTestCase(unittest.TestCase):
     '''
-    Test reply first follow event
+    Test follow
     '''
     def setUp(self):
         '''
@@ -73,3 +73,9 @@ class BasicsTestCase(unittest.TestCase):
                 'messages': self.expected_message
             }
         )
+    
+    def test_unfollow(self):
+        '''
+        Test reply unfollow
+        '''
+        unfollow('line_user_id')
