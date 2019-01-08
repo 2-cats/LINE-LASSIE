@@ -7,7 +7,7 @@ from linebot import LineBotApi
 from app.chatbot.follow import follow_message, unfollow
 
 
-class BasicsTestCase(unittest.TestCase):
+class FollowTestCase(unittest.TestCase):
     '''
     Test follow
     '''
