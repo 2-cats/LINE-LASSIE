@@ -5,7 +5,8 @@ from flask import Flask
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, IconComponent, ImageComponent,
-                            ImageSendMessage, TextComponent, URIAction)
+                            ImageSendMessage, SeparatorComponent,
+                            TextComponent, URIAction)
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
