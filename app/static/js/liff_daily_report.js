@@ -1,22 +1,51 @@
 window.onload = function (e) {
-    
+    data = prepareData()
+    generateChart(data[0], data[1]);
     liff.init(function (data) {
-        generateChart();
         initializeApp(data);
     });
 };
+function prepareData(){
+    // Disassemble the original query
+    davice_data_list = davice_data_str.split(',');
 
-function generateChart(){
-    // Preparing data
-    var device_dataset = [
-        [ "一號溫度機", 5, 1, 2, 4 , 3, 4, 6],
-        [ "二號溫度機", 6, 1, 2, 4 , 3, 4, 6],
-        [ "三號溫度機", 8, 1, 2, 4 , 3, 4, 6]
-    ]
+    device_count = 0;
+    device_name = [];
+    device_name_ane_value = [];
+    tmp_list = [];
+
+    // Scan array for each item
+    for (cnt = 0; cnt < davice_data_list.length; cnt++) { 
+        // If item is title
+        if (device_count == 0){
+            //Push device_name to device name list
+            device_name.push(davice_data_list[cnt]);
+            tmp_list.push(davice_data_list[cnt]);
+        // If item is not title
+        }else{
+            tmp_list.push(parseInt(davice_data_list[cnt]));
+        }
+
+        device_count++;
+
+        //Confirm if it is the next machine
+        if (device_count == 8){
+            // Complete the array and combine it back
+            device_name_ane_value.push(tmp_list);
+            // initialization
+            device_count = 0;
+            tmp_list = [];
+        }
+    }
+    
     var device_set = [
-        ['一號溫度機', '二號溫度機', '三號溫度機']
-    ]
+        device_name
+    ];
+    return [device_name_ane_value, device_set];
+}
 
+function generateChart(device_dataset, device_set){
+    
     /* Start bar chart */
     // Generate bar chart
     var bar_chart = c3.generate({
@@ -85,6 +114,7 @@ function generateChart(){
     }, 1000);
     /* End bar chart */
 }
+
 
 function initializeApp(data) {
     document.getElementById('closewindowbutton').addEventListener('click', function () {
