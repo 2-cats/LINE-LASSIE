@@ -1,6 +1,6 @@
 window.onload = function (e) {
     data = prepareData()
-    generateChart(data[0], data[1]);
+    generateChart(data[0], data[1], data[2]);
     liff.init(function (data) {
         initializeApp(data);
     });
@@ -29,7 +29,7 @@ function prepareData(){
         device_count++;
 
         //Confirm if it is the next machine
-        if (device_count == 8){
+        if (device_count == 25){
             // Complete the array and combine it back
             device_name_ane_value.push(tmp_list);
             // initialization
@@ -41,7 +41,18 @@ function prepareData(){
     var device_set = [
         device_name
     ];
-    return [device_name_ane_value, device_set];
+
+    hours_string = []
+    for (cnt = 0; cnt < 24; cnt++) {
+        if (cnt % 6 == 0){
+            hours_string.push(cnt)
+        }else{
+            hours_string.push("")
+        }
+        
+    }
+
+    return [device_name_ane_value, device_set, hours_string];
 }
 
 function generateChart(device_dataset, device_set){
@@ -61,21 +72,18 @@ function generateChart(device_dataset, device_set){
         grid: {
             x: {
                 lines: [
-                    {value: 0.5},
-                    {value: 1.5},
-                    {value: 2.5},
-                    {value: 3.5},
-                    {value: 4.5},
-                    {value: 5.5},
-                    {value: 6.5}
+                    {value: 0.0, text: '上午十二時'},
+                    {value: 5.5, text: '上午六時'},
+                    {value: 11.5, text: '下午十二時'},
+                    {value: 17.5, text: '下午六時'}
                 ]
             }
         },
         axis: {
             x: {
                 type: 'category',
-                categories: ['日', '一', '二', '三', '四', '五', '六']
-            }
+                categories: hours_string
+            },
         },
         transition: {
             duration: 900
