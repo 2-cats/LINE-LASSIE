@@ -16,18 +16,28 @@ handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 def lassie_alarm_message(mqtt_message):
     push_id = username_to_line_user_id(mqtt_message['u'])
     unit = ''
+    rule = ''
     if mqtt_message['t'] == 'counter':
         unit = ' (次)'
-    if mqtt_message['t'] == 'lamp' or 'state' or 'color' or 'detector' or 'ocr':
+        rule = '設定 : ' + str(mqtt_message['r']) + ' 次'
+    elif (mqtt_message['t'] == 'lamp') or ( mqtt_message['t'] == 'state') or (mqtt_message['t'] == 'color') or (mqtt_message['t'] == 'detector'):
         unit = ' (偵測值)'
-    if mqtt_message['t'] == 'current':
+        rule = '設定 : ' + str(mqtt_message['r'])
+    elif mqtt_message['t'] == 'current':
         unit = ' (mAh)'
-    if mqtt_message['t'] == 'temperature':
+        rule = '設定 : ' + str(mqtt_message['r']) + ' mAh'
+    elif mqtt_message['t'] == 'temperature':
         unit = ' (℃)'
-    if mqtt_message['t'] == 'humidity':
+        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l']) + ' ℃'
+    elif mqtt_message['t'] == 'humidity':
         unit = ' (%)'
-    if mqtt_message['t'] == 'timer':
+        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l']) + ' %'
+    elif mqtt_message['t'] == 'timer':
         unit = ' (秒)'
+        rule = '設定 : ' + str(mqtt_message['r']) + ' 秒'
+    elif mqtt_message['t'] == 'ocr':
+        unit = '(偵測值)'
+        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l'])
     message_list = []
     if mqtt_message['url'] != "":
         message = ImageSendMessage(
@@ -38,12 +48,12 @@ def lassie_alarm_message(mqtt_message):
     message = FlexSendMessage(
         alt_text='異常通知',
         contents=BubbleContainer(
-            hero=ImageComponent(
-                url='https://i.imgur.com/oUFb1aH.png',
-                size='full',
-                aspect_ratio='2:1',
-                aspect_mode='cover'
-            ),
+             hero=ImageComponent(
+                 url='https://i.imgur.com/GIrEMgY.png',
+                 size='full',
+                 aspect_ratio='20:13',
+                 aspect_mode='cover'
+             ),
             body=BoxComponent(
                 layout='vertical',
                 flex=1,
@@ -51,9 +61,9 @@ def lassie_alarm_message(mqtt_message):
                 margin='md',
                 contents=[
                     TextComponent(
-                        text=mqtt_message['nt'] + ' 偵測到異常',
+                        text=mqtt_message['nt'] + ' 異常',
                         weight='bold',
-                        wrap=False,
+                        wrap=True,
                         size='xl',
                         color='#464646',
                         flex=1,
@@ -65,7 +75,7 @@ def lassie_alarm_message(mqtt_message):
                         layout='vertical',
                         flex=1,
                         spacing='sm',
-                        margin='md',
+                        margin='lg',
                         contents=[
                             BoxComponent(
                                 layout='baseline',
@@ -73,16 +83,11 @@ def lassie_alarm_message(mqtt_message):
                                 spacing='sm',
                                 margin='md',
                                 contents=[
-                                    IconComponent(
-                                        aspect_ratio='1:1',
-                                        margin='none',
-                                        size='md',
-                                        url='https://i.imgur.com/OoRVQey.png'
-                                    ),
+
                                     TextComponent(
                                         text=mqtt_message['ns'],
                                         weight='bold',
-                                        wrap=False,
+                                        wrap=True,
                                         size='md',
                                         color='#464646',
                                         flex=0,
@@ -92,12 +97,12 @@ def lassie_alarm_message(mqtt_message):
                                     ),
                                     TextComponent(
                                         text=str(mqtt_message['v']) + unit,
-                                        weight='regular',
+                                        weight='bold',
                                         wrap=False,
-                                        size='sm',
-                                        color='#000000',
+                                        size='xl',
+                                        color='#D0021B',
                                         flex=1,
-                                        margin='none',
+                                        margin='md',
                                         align='end',
                                         gravity='top'
                                     ),
@@ -106,16 +111,29 @@ def lassie_alarm_message(mqtt_message):
                         ]
                     ),
                     TextComponent(
+                        text=str(rule),
+                        weight='regular',
+                        wrap=True,
+                        size='sm',
+                        color='#000000',
+                        flex=1,
+                        margin='md',
+                        align='end',
+                        gravity='top'
+                    ),
+                    SeparatorComponent(),
+                    TextComponent(
                         text=mqtt_message['time'],
                         weight='regular',
                         wrap=True,
                         size='xs',
                         color='#aaaaaa',
                         flex=1,
-                        margin='none',
+                        margin='sm',
                         align='end',
                         gravity='top'
                     ),
+
                 ]
             )
         )
