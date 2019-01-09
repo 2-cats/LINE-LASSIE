@@ -99,11 +99,6 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
-    if message_text == "aa":
-        mm = {"u":"iamerictest", "d":"妳好,1,1,3,3,2,3,4,vvvv,1,1,3,2,2,3,4,dddd,1,1,3,2,2,3,4,xxxx,1,1,3,2,2,3,4,ddd,1,1,3,2,2,3,4"}
-        lassie_report_message(mm)
-        return 0
-
     # Check user is bind
     if check_bind(line_user_id):
         if message_text == "異常總覽":
