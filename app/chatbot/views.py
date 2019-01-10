@@ -48,7 +48,7 @@ def handle_mqtt_message(client, userdata, message):
     if topic == "/line/gl1/lassie/alarm":
         payload = message.payload.decode()
         lassie_alarm_message(json.loads(payload))
-    if topic == "/line/gl1/lassie/report":
+    elif topic == "/line/gl1/lassie/report":
         payload = message.payload.decode()
         lassie_report_message(json.loads(payload))
 
