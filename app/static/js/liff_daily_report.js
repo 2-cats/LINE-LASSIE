@@ -1,22 +1,62 @@
 window.onload = function (e) {
-    
+    data = prepareData()
+    generateChart(data[0], data[1], data[2]);
     liff.init(function (data) {
-        generateChart();
         initializeApp(data);
     });
 };
+function prepareData(){
+    // Disassemble the original query
+    davice_data_list = davice_data_str.split(',');
 
-function generateChart(){
-    // Preparing data
-    var device_dataset = [
-        [ "一號溫度機", 5, 1, 2, 4 , 3, 4, 6],
-        [ "二號溫度機", 6, 1, 2, 4 , 3, 4, 6],
-        [ "三號溫度機", 8, 1, 2, 4 , 3, 4, 6]
-    ]
+    device_count = 0;
+    device_name = [];
+    device_name_ane_value = [];
+    tmp_list = [];
+
+    // Scan array for each item
+    for (cnt = 0; cnt < davice_data_list.length; cnt++) { 
+        // If item is title
+        if (device_count == 0){
+            //Push device_name to device name list
+            device_name.push(davice_data_list[cnt]);
+            tmp_list.push(davice_data_list[cnt]);
+        // If item is not title
+        }else{
+            tmp_list.push(parseInt(davice_data_list[cnt]));
+        }
+
+        device_count++;
+
+        //Confirm if it is the next machine
+        if (device_count == 25){
+            // Complete the array and combine it back
+            device_name_ane_value.push(tmp_list);
+            // initialization
+            device_count = 0;
+            tmp_list = [];
+        }
+    }
+    
     var device_set = [
-        ['一號溫度機', '二號溫度機', '三號溫度機']
-    ]
+        device_name
+    ];
 
+    hours_string = []
+    for (cnt = 0; cnt < 24; cnt++) {
+        if (cnt % 6 == 0){
+            hours_string.push(cnt)
+        }else{
+            hours_string.push("")
+        }
+        
+    }
+
+    return [device_name_ane_value, device_set, hours_string];
+}
+
+function generateChart(device_dataset, device_set){
+    
     /* Start bar chart */
     // Generate bar chart
     var bar_chart = c3.generate({
@@ -32,21 +72,18 @@ function generateChart(){
         grid: {
             x: {
                 lines: [
-                    {value: 0.5},
-                    {value: 1.5},
-                    {value: 2.5},
-                    {value: 3.5},
-                    {value: 4.5},
-                    {value: 5.5},
-                    {value: 6.5}
+                    {value: 0.0, text: '上午十二時'},
+                    {value: 5.5, text: '上午六時'},
+                    {value: 11.5, text: '下午十二時'},
+                    {value: 17.5, text: '下午六時'}
                 ]
             }
         },
         axis: {
             x: {
                 type: 'category',
-                categories: ['日', '一', '二', '三', '四', '五', '六']
-            }
+                categories: hours_string
+            },
         },
         transition: {
             duration: 900
@@ -64,10 +101,6 @@ function generateChart(){
     /* Start pie chart */
     // Generate pie chart
     var pie_chart = c3.generate({
-        size: {
-            height: 2400,
-            width: 4800
-        },
         bindto: '#pie_chart',
         padding: {
             bottom: 40
@@ -89,6 +122,7 @@ function generateChart(){
     }, 1000);
     /* End bar chart */
 }
+
 
 function initializeApp(data) {
     document.getElementById('closewindowbutton').addEventListener('click', function () {
