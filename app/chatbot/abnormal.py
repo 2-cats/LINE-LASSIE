@@ -355,7 +355,7 @@ def get_device_list_data_for_alarmlist(line_user_id):
             'https://api.sensor.live/api/projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/end_users/',
-            user.aws_user_name,
+            '54ce49c7-9fc0-482d-850c-a39ae37f0d6c',
             '/resources?target=things'
         ]),
         headers={

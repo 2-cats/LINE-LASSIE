@@ -28,7 +28,4 @@ def follow_message(line_user_id):
 
 def unfollow(line_user_id):
     user = User.query.filter_by(line_user_id=line_user_id).first()
-    try:
-        User.link_rm_to_guest(user)
-    except:
-        pass
+    User.link_rm_to_guest(user)
