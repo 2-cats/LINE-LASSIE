@@ -11,10 +11,10 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
 
 from . import chatbot
 from .. import db
-from .abnormal import summary
 from .bind import check_bind
 from .contact import contact_us
 from .device import device_list_message
+from .abnormal import device_list_message_for_alarmlist,summary
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
 from .mqtt import lassie_alarm_message
@@ -95,8 +95,9 @@ def handle_message(event):
     # Check user is bind
     if check_bind(line_user_id):
         if message_text == "異常總覽":
-            message = summary(line_user_id)
+            message = TextSendMessage(text='稍等一下！我正在搜尋您的萊西...')
             line_bot_api.reply_message(event.reply_token, message)
+            device_list_message_for_alarmlist(line_user_id)
             return 0
         if message_text == "聯絡我們":
             message = contact_us(line_user_id)
@@ -123,7 +124,7 @@ def handle_postback(event):
     # Convet to postback_data: [action, var1, var2, ... ,varN]
     postback_data = event.postback.data.split(",") 
     if postback_data[0] == "abnormal":
-        message = summary(line_user_id)
+        message = summary(line_user_id,postback_data)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
