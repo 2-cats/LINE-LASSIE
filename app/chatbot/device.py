@@ -19,9 +19,15 @@ line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 def device_list_message(line_user_id):
     devices_data = get_device_list_data(line_user_id)
     if devices_data:
-        return have_device_message(line_user_id, devices_data)
+        line_bot_api.push_message(
+            line_user_id,
+            have_device_message(line_user_id, devices_data)
+        ) 
     else:
-        return no_device_message(line_user_id)
+        line_bot_api.push_message(
+            line_user_id,
+            no_device_message(line_user_id)
+        )
 
 def have_device_message(line_user_id, devices_data):
     carousel_template_columns = []
@@ -53,15 +59,12 @@ def have_device_message(line_user_id, devices_data):
             contents=carousel_template_columns
         )
     )
-    line_bot_api.push_message(line_user_id, message)
+    return message
 
 def no_device_message(line_user_id):
-    line_bot_api.push_message(
-        line_user_id,
-        TextSendMessage(
+    return TextSendMessage(
             text='您尚未使用任何萊西！'
         )
-    )
 
 def get_device_list_data(line_user_id):
     user = User.query.filter_by(

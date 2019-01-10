@@ -142,8 +142,12 @@ def lassie_alarm_message(mqtt_message):
     message_list.append(message)
     line_bot_api.push_message(push_id, message_list)
 
-def lassie_report_message(mqtt_message):
+def lassie_report(mqtt_message):
     line_user_id = username_to_line_user_id(mqtt_message['u'])
+    message = lassie_report_message(mqtt_message['d'])
+    line_bot_api.push_message(line_user_id, message)
+
+def lassie_report_message(data):
     message = FlexSendMessage(
         alt_text='今日報表',
         contents=BubbleContainer(
@@ -179,7 +183,7 @@ def lassie_report_message(mqtt_message):
                             uri=''.join([
                                app.config['REPORT_LINE_LIFF_URL'],
                                "?data=",
-                               urllib.parse.quote_plus(str(mqtt_message['d'])) 
+                               urllib.parse.quote_plus(str(data)) 
                             ])
                         )
                     )
@@ -187,7 +191,7 @@ def lassie_report_message(mqtt_message):
             )
         )
     )
-    line_bot_api.push_message(line_user_id, message)
+    return message
 
 def username_to_line_user_id(username):
     # Convert username to line_user_id
