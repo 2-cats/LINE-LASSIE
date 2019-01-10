@@ -74,6 +74,8 @@ class FollowTestCase(unittest.TestCase):
             }
         )
     
+class UnfollowTestCase(unittest.TestCase):
+
     def test_unfollow(self):
         '''
         Test reply unfollow

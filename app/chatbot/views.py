@@ -17,7 +17,7 @@ from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
-from .mqtt import lassie_alarm_message, lassie_report_message
+from .mqtt import lassie_alarm_message, lassie_report
 from .report import make_report
 
 app = Flask(__name__, instance_relative_config=True)
@@ -48,9 +48,9 @@ def handle_mqtt_message(client, userdata, message):
     if topic == "/line/gl1/lassie/alarm":
         payload = message.payload.decode()
         lassie_alarm_message(json.loads(payload))
-    if topic == "/line/gl1/lassie/report":
+    elif topic == "/line/gl1/lassie/report":
         payload = message.payload.decode()
-        lassie_report_message(json.loads(payload))
+        lassie_report(json.loads(payload))
 
 @chatbot.route("/callback", methods=['POST'])
 def callback():
@@ -113,6 +113,7 @@ def handle_message(event):
             message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
             line_bot_api.reply_message(event.reply_token, message)
             device_list_message(line_user_id)
+            return 0
         if message_text == "今日報表":
             message = make_report(mqtt, line_user_id)
             line_bot_api.reply_message(event.reply_token, message)

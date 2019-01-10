@@ -8,7 +8,7 @@ from app.chatbot.error_message import (alert_no_action_message,
                                        alert_to_bind_message)
 
 
-class ErrorMessageTestCase(unittest.TestCase):
+class NoActionMessageTestCase(unittest.TestCase):
     '''
     Test error message
     '''
@@ -19,8 +19,8 @@ class ErrorMessageTestCase(unittest.TestCase):
         self.tested = LineBotApi('channel_secret')
         # test data
 
-        self.result_no_action_message = alert_no_action_message('line_user_id')
-        self.expected_no_action_message = [
+        self.result_message = alert_no_action_message('line_user_id')
+        self.expected_message = [
             {
                 "packageId":2,
                 "stickerId":149,
@@ -71,8 +71,45 @@ class ErrorMessageTestCase(unittest.TestCase):
             }
         ]
 
-        self.result_to_bind_message = alert_to_bind_message('line_user_id')
-        self.expected_to_bind_message = [
+    @responses.activate
+    def test_no_action_message(self):
+        '''
+        Test reply message
+        '''
+        responses.add(
+            responses.POST,
+            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply',
+            json={}, status=200
+        )
+
+        self.tested.reply_message('replyToken', self.result_message)
+        
+        request = responses.calls[0].request
+        self.assertEqual(
+            request.url,
+            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply')
+        self.assertEqual(request.method, 'POST')
+        self.assertEqual(
+            json.loads(request.body),
+            {
+                'replyToken': 'replyToken',
+                'messages': self.expected_message
+            }
+        )
+
+class NoBindMessageTestCase(unittest.TestCase):
+    '''
+    Test error message
+    '''
+    def setUp(self):
+        '''
+        Set up test
+        '''
+        self.tested = LineBotApi('channel_secret')
+        # test data
+
+        self.result_message = alert_to_bind_message('line_user_id')
+        self.expected_message = [
             {
                 "type":"template",
                 "altText":"綁定帳號",
@@ -90,31 +127,6 @@ class ErrorMessageTestCase(unittest.TestCase):
                 }
             }
         ]
-    @responses.activate
-    def test_no_action_message(self):
-        '''
-        Test reply contact event message
-        '''
-        responses.add(
-            responses.POST,
-            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply',
-            json={}, status=200
-        )
-
-        self.tested.reply_message('replyToken', self.result_no_action_message)
-        
-        request = responses.calls[0].request
-        self.assertEqual(
-            request.url,
-            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply')
-        self.assertEqual(request.method, 'POST')
-        self.assertEqual(
-            json.loads(request.body),
-            {
-                'replyToken': 'replyToken',
-                'messages': self.expected_no_action_message
-            }
-        )
 
     @responses.activate
     def test_to_bind_message(self):
@@ -127,7 +139,7 @@ class ErrorMessageTestCase(unittest.TestCase):
             json={}, status=200
         )
 
-        self.tested.reply_message('replyToken', self.result_to_bind_message)
+        self.tested.reply_message('replyToken', self.result_message)
         
         request = responses.calls[0].request
         self.assertEqual(
@@ -138,7 +150,6 @@ class ErrorMessageTestCase(unittest.TestCase):
             json.loads(request.body),
             {
                 'replyToken': 'replyToken',
-                'messages': self.expected_to_bind_message
+                'messages': self.expected_message
             }
         )
-
