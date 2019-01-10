@@ -77,5 +77,8 @@ def check_line_user_id_exist(line_user_id):
 def bind_line_user_id(username, line_user_id):
     user = User(aws_user_name=username, line_user_id=line_user_id)
     db.session.add(user)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        pass
     User.link_rm_to_user(user)
