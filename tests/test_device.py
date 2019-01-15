@@ -112,7 +112,7 @@ class HaveDeviceMessageTestCase(unittest.TestCase):
         ]
 
     @responses.activate
-    def test_follow_message(self):
+    def test_have_device_message(self):
         responses.add(
             responses.POST,
             LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply',
@@ -145,7 +145,6 @@ class NoDeviceMessageTestCase(unittest.TestCase):
         self.tested = LineBotApi('channel_secret')
         # test data
         self.result_message = no_device_message('line_user_id')
-        print(self.result_message)
         self.expected_message = [
            {
                 "text":"您尚未使用任何萊西！",
@@ -154,7 +153,7 @@ class NoDeviceMessageTestCase(unittest.TestCase):
         ]
 
     @responses.activate
-    def test_follow_message(self):
+    def test_no_device_message(self):
         responses.add(
             responses.POST,
             LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply',

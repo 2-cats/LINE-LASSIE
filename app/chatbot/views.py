@@ -34,24 +34,6 @@ app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
 app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
 mqtt = Mqtt(app)
 
-# Subscribe MQTT: Lassie/alarm
-@mqtt.on_connect()
-def handle_connect(client, userdata, flags, rc):
-    mqtt.subscribe("/line/gl1/lassie/alarm")
-    mqtt.subscribe("/line/gl1/lassie/report")
-    
-
-# Handle MQTT message
-@mqtt.on_message()
-def handle_mqtt_message(client, userdata, message):
-    topic = message.topic
-    if topic == "/line/gl1/lassie/alarm":
-        payload = message.payload.decode()
-        lassie_alarm_message(json.loads(payload))
-    elif topic == "/line/gl1/lassie/report":
-        payload = message.payload.decode()
-        lassie_report(json.loads(payload))
-
 @chatbot.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
