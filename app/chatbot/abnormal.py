@@ -71,7 +71,7 @@ def summary(line_user_id,postback_data):
                                 margin='md',
                             ),
                             TextComponent(
-                                text=postback_data[1],
+                                text=things_shadow_json['state']['reported']['n'],
                                 size='xs',
                                 color='#aaaaaa',
                             ),
