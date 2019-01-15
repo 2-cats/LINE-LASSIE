@@ -2,20 +2,13 @@ import urllib
 
 import pymysql
 from flask import Flask
-from linebot import LineBotApi, WebhookHandler
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, IconComponent, ImageComponent,
                             ImageSendMessage, SeparatorComponent,
                             TextComponent, URIAction)
 
-app = Flask(__name__, instance_relative_config=True)
-app.config.from_pyfile('config.py')
-
-line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
-handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
 def lassie_alarm_message(mqtt_message):
-    push_id = username_to_line_user_id(mqtt_message['u'])
     unit = ''
     rule = ''
     if mqtt_message['t'] == 'counter':
@@ -140,71 +133,4 @@ def lassie_alarm_message(mqtt_message):
         )
     )
     message_list.append(message)
-    line_bot_api.push_message(push_id, message_list)
-
-def lassie_report(mqtt_message):
-    line_user_id = username_to_line_user_id(mqtt_message['u'])
-    message = lassie_report_message(mqtt_message['d'])
-    line_bot_api.push_message(line_user_id, message)
-
-def lassie_report_message(data):
-    message = FlexSendMessage(
-        alt_text='今日報表',
-        contents=BubbleContainer(
-            body=BoxComponent(
-                layout='vertical',
-                flex=1,
-                spacing='md',
-                margin='md',
-                contents=[
-                    TextComponent(
-                        text='今日報表',
-                        weight='bold',
-                        size='lg',
-                        color='#1DB446'
-                    ),
-                    TextComponent(
-                        text='我已經幫你把今日報表整理完成了，請點擊檢視',
-                        wrap=True,
-                        size='md',
-                    )
-                ]
-            ),
-            footer=BoxComponent(
-                layout='vertical',
-                flex=1,
-                spacing='md',
-                margin='md',
-                contents=[
-                        ButtonComponent(
-                        style='link',
-                        action=URIAction(
-                            label='檢視報表',
-                            uri=''.join([
-                               app.config['REPORT_LINE_LIFF_URL'],
-                               "?data=",
-                               urllib.parse.quote_plus(str(data)) 
-                            ])
-                        )
-                    )
-                ]
-            )
-        )
-    )
-    return message
-
-def username_to_line_user_id(username):
-    # Convert username to line_user_id
-    database = pymysql.connect(
-        app.config['DB_HOST'],
-        app.config['DB_USERNAME'],
-        app.config['DB_PASSWORD'],
-        app.config['DB_NAME'],
-        charset="utf8"
-    )
-    cursor = database.cursor()
-    args = (username,)
-    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name =  %s", args)
-    result = cursor.fetchone()
-    database.close()
-    return result[0]
+    return message_list

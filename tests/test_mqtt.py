@@ -4,8 +4,7 @@ import unittest
 import responses
 from linebot import LineBotApi
 
-from app.chatbot.bind import check_bind
-from app.chatbot.mqtt import lassie_report_message, username_to_line_user_id
+from app.mqtt.report import lassie_report_message
 
 
 class MQTTTestCase(unittest.TestCase):
@@ -91,8 +90,3 @@ class MQTTTestCase(unittest.TestCase):
                 'messages': self.expected_lassie_report_message
             }
         )
-    
-
-    def test_check_line_user_id_exist(self):
-        self.assertEquals(username_to_line_user_id(self.user_lind_id), 'U8b4aed9d0ea94a6a8f62d9e801653517')
-        return 0
