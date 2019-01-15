@@ -76,6 +76,7 @@ def summary(line_user_id,postback_data):
                                 color='#aaaaaa',
                             ),
                             SeparatorComponent(margin='none'),
+
                         ],
                     ),
                     body=BoxComponent(
