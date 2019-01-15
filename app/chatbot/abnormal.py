@@ -82,8 +82,7 @@ def summary(line_user_id,postback_data):
                                 size='xs',
                                 color='#aaaaaa',
                             ),
-                            SeparatorComponent(margin='none'),
-
+                            SeparatorComponent(),
                         ],
                     ),
                     body=BoxComponent(
@@ -102,7 +101,6 @@ def summary(line_user_id,postback_data):
                                         text='Sensor',
                                         weight='bold',
                                         color='#030303',
-                                        margin='none',
                                         size='lg'
                                     ),
                                     TextComponent(
@@ -157,7 +155,6 @@ def summary(line_user_id,postback_data):
                                         weight='regular',
                                         align='start',
                                         color='#aaaaaa',
-                                        margin='none',
                                         size='xs',
                                         gravity="top"
                                     ),
@@ -200,7 +197,7 @@ def summary(line_user_id,postback_data):
                     size='xs',
                     color='#aaaaaa',
                 ),
-               SeparatorComponent(margin='none'),
+               SeparatorComponent(),
             ],
         ),
         body=BoxComponent(
@@ -219,7 +216,6 @@ def summary(line_user_id,postback_data):
                     text='Sensor',
                     weight='bold',
                     color='#030303',
-                    margin='none',
                     size='lg'
                     ),
                 TextComponent(
@@ -252,7 +248,6 @@ def summary(line_user_id,postback_data):
                             weight='regular',
                             align='start',
                             color='#aaaaaa',
-                            margin='none',
                             size='xs',
                             gravity="top"
                         ),
@@ -303,7 +298,6 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
             }
         )
         things_shadow_json = json.loads(things_shadow.text)
-        print(devices_data)
         if things_shadow_json is None:
             pass
         elif things_shadow_json !={}:
@@ -323,7 +317,6 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                                 flex=100,
                                 size='xl',
                                 weight='bold',
-                                margin="none",
                                 height='sm',
                                 gravity='center',
                                 style='link'
