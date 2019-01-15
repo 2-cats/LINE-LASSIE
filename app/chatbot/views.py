@@ -17,7 +17,6 @@ from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
-from .mqtt import lassie_alarm_message, lassie_report
 from .report import make_report
 
 app = Flask(__name__, instance_relative_config=True)
