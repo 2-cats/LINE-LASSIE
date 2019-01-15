@@ -82,7 +82,7 @@ def summary(line_user_id,postback_data):
                                 size='xs',
                                 color='#aaaaaa',
                             ),
-                            SeparatorComponent(margin='none'),
+                            SeparatorComponent(),
                         ],
                     ),
                     body=BoxComponent(
@@ -101,7 +101,6 @@ def summary(line_user_id,postback_data):
                                         text='Sensor',
                                         weight='bold',
                                         color='#030303',
-                                        margin='none',
                                         size='lg'
                                     ),
                                     TextComponent(
@@ -156,7 +155,6 @@ def summary(line_user_id,postback_data):
                                         weight='regular',
                                         align='start',
                                         color='#aaaaaa',
-                                        margin='none',
                                         size='xs',
                                         gravity="top"
                                     ),
@@ -199,7 +197,7 @@ def summary(line_user_id,postback_data):
                     size='xs',
                     color='#aaaaaa',
                 ),
-               SeparatorComponent(margin='none'),
+               SeparatorComponent(),
             ],
         ),
         body=BoxComponent(
@@ -218,7 +216,6 @@ def summary(line_user_id,postback_data):
                     text='Sensor',
                     weight='bold',
                     color='#030303',
-                    margin='none',
                     size='lg'
                     ),
                 TextComponent(
@@ -251,7 +248,6 @@ def summary(line_user_id,postback_data):
                             weight='regular',
                             align='start',
                             color='#aaaaaa',
-                            margin='none',
                             size='xs',
                             gravity="top"
                         ),
@@ -311,7 +307,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                         layout='vertical',
                         contents=[
                             TextComponent(
-                                text=str(device_data['name']),
+                                text=str(device_data['display_name']),
                                 wrap=True,
                                 weight='bold',
                                 size='lg',
@@ -321,7 +317,6 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                                 flex=100,
                                 size='xl',
                                 weight='bold',
-                                margin="none",
                                 height='sm',
                                 gravity='center',
                                 style='link'
@@ -385,7 +380,8 @@ def get_device_list_data_for_alarmlist(line_user_id):
             thing_response_json = json.loads(thing_response.text)
             thing_data.append(
                 {
-                    'name': thing_response_json['display_name']
+                    'name': thing_response_json['name'],
+                    'display_name': thing_response_json['display_name']
                 }
             )
         return thing_data
