@@ -109,7 +109,7 @@ def get_device_list_data(line_user_id):
                 text_color = '#1DB446'
             thing_data.append(
                 {
-                    'name': thing_response_json['name'],
+                    'name': thing_response_json['display_name'],
                     'device_status': alive,
                     'text_color': text_color
                 }
