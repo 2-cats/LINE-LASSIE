@@ -317,7 +317,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                                 size='lg',
                             ),
                             ButtonComponent(
-                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['display_name']])),
+                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']])),
                                 flex=100,
                                 size='xl',
                                 weight='bold',
