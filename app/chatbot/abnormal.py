@@ -1,17 +1,24 @@
-import json
 import datetime
+import json
+
 import requests
 from flask import Flask
 from linebot import LineBotApi
-from linebot.models import (BoxComponent, BubbleContainer, CarouselContainer,ImageSendMessage,
-                            FlexSendMessage, TextComponent, TextSendMessage,PostbackAction,ButtonComponent,SeparatorComponent)
+from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
+                            CarouselContainer, FlexSendMessage,
+                            ImageSendMessage, PostbackAction,
+                            SeparatorComponent, TextComponent, TextSendMessage)
 
 import config
 
 from ..models import User
 
-#user.aws_user_name
-#不會有同THING NAME的問題:不同專案下無法有同THING NAME
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
+
+line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
+
+
 def summary(line_user_id,postback_data):
     user = User.query.filter_by(
         line_user_id=line_user_id
@@ -269,10 +276,6 @@ def summary(line_user_id,postback_data):
     message = FlexSendMessage(alt_text='異常總表', contents=bubble)
     return message
 
-app = Flask(__name__, instance_relative_config=True)
-app.config.from_pyfile('config.py')
-
-line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 
 def device_list_message_for_alarmlist(line_user_id):
     devices_data = get_device_list_data_for_alarmlist(line_user_id)
@@ -382,7 +385,7 @@ def get_device_list_data_for_alarmlist(line_user_id):
             thing_response_json = json.loads(thing_response.text)
             thing_data.append(
                 {
-                    'name': thing_response_json['name']
+                    'name': thing_response_json['display_name']
                 }
             )
         return thing_data
