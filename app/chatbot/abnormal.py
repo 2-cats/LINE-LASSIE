@@ -303,6 +303,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
             }
         )
         things_shadow_json = json.loads(things_shadow.text)
+        print(devices_data)
         if things_shadow_json is None:
             pass
         elif things_shadow_json !={}:
@@ -312,13 +313,13 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                         layout='vertical',
                         contents=[
                             TextComponent(
-                                text=str(device_data['name']),
+                                text=str(device_data['display_name']),
                                 wrap=True,
                                 weight='bold',
                                 size='lg',
                             ),
                             ButtonComponent(
-                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['display_name']])),
+                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']])),
                                 flex=100,
                                 size='xl',
                                 weight='bold',
@@ -386,7 +387,8 @@ def get_device_list_data_for_alarmlist(line_user_id):
             thing_response_json = json.loads(thing_response.text)
             thing_data.append(
                 {
-                    'name': thing_response_json['display_name']
+                    'name': thing_response_json['name'],
+                    'display_name': thing_response_json['display_name']
                 }
             )
         return thing_data
