@@ -14,8 +14,10 @@ def lassie_report(mqtt_message):
     
 
 def lassie_report_message(data):
+    thing_name = data.split(',')
+
     message = FlexSendMessage(
-        alt_text='今日報表',
+        alt_text=''.join([thing_name[0], ' 的今日報表']),
         contents=BubbleContainer(
             body=BoxComponent(
                 layout='vertical',
@@ -24,7 +26,8 @@ def lassie_report_message(data):
                 margin='md',
                 contents=[
                     TextComponent(
-                        text='今日報表',
+                        text=''.join([thing_name[0], ' 的今日報表']),
+                        wrap=True,
                         weight='bold',
                         size='lg',
                         color='#1DB446'
