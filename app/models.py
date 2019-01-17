@@ -41,3 +41,19 @@ class User(db.Model):
             line_bot_api.link_rich_menu_to_user(self.line_user_id, app.config['USER_RICH_MENU_ID'])
         except:
             pass
+
+class Member(db.Model):
+    __tablename__ = 'members'
+    id = db.Column(db.Integer, primary_key = True)
+    source_id = db.Column(db.String(64))
+    source_type = db.Column(db.String(64))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    arn = db.Column(db.String(64))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    deleted_at = db.Column(db.DateTime)
+
+    user = db.relationship("User", back_populates="members")
+
+    def __repr__(self):
+        return '<Member %r>' % self.source_id
