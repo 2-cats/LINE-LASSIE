@@ -7,9 +7,10 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
                             LocationMessage, MessageEvent, PostbackEvent,
                             StickerMessage, TextMessage, TextSendMessage,
-                            UnfollowEvent)
+                            UnfollowEvent, JoinEvent)
 
 from . import chatbot
+from .bind import bind_room_or_group_id
 from .. import db
 from .abnormal import device_list_message_for_alarmlist,summary
 from .bind import check_bind
@@ -59,6 +60,17 @@ def handle_follow(event):
     line_bot_api.reply_message(event.reply_token, message)
     return 0
 
+@handler.add(JoinEvent)
+def handle_join(event):
+    line_user_id = event.source.user_id
+    if check_bind(line_user_id):
+        if event.source.type == "group":
+            source_id = event.source.group_id
+        if event.source.type == "room":
+            source_id = event.source.room_id
+        bind_room_or_group_id(source_id, event.source.type, line_user_id)
+        return 0
+
 @handler.add(UnfollowEvent)
 def handle_unfollow(event):
     '''
@@ -74,7 +86,6 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
-
     if message_text == "get_me_line_user_id":
         message = TextSendMessage(text=str(line_user_id))
         line_bot_api.reply_message(event.reply_token, message)
@@ -82,6 +93,7 @@ def handle_message(event):
 
     # Check user is bind
     if check_bind(line_user_id):
+
         if message_text == "異常總覽":
             message = TextSendMessage(text='稍等一下！我正在搜尋您的萊西...')
             line_bot_api.reply_message(event.reply_token, message)
@@ -96,6 +108,7 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, message)
             device_list_message(line_user_id)
             return 0
+
         if message_text == "今日報表":
             message = make_report(mqtt, line_user_id)
             line_bot_api.reply_message(event.reply_token, message)

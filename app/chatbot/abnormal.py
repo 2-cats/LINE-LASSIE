@@ -313,7 +313,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                                 size='lg',
                             ),
                             ButtonComponent(
-                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']])),
+                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']]),display_text='正在傳送...'),
                                 flex=100,
                                 size='xl',
                                 weight='bold',
@@ -353,7 +353,7 @@ def get_device_list_data_for_alarmlist(line_user_id):
             'https://api.sensor.live/api/projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/end_users/',
-            user.aws_user_name,
+            '54ce49c7-9fc0-482d-850c-a39ae37f0d6c',
             '/resources?target=things'
         ]),
         headers={
