@@ -6,7 +6,7 @@ from linebot import LineBotApi
 
 from . import mqtt
 from .. import db
-from .alarm import lassie_alarm_message
+from .alarm import get_push_id, lassie_alarm_message
 from .report import lassie_report
 from .user import username_to_line_user_id
 
@@ -37,8 +37,9 @@ def handle_mqtt_message(client, userdata, message):
     if topic == "/line/gl1/lassie/alarm":
         payload = json.loads(message.payload.decode())
         message = lassie_alarm_message(payload)
-        line_user_id = username_to_line_user_id(payload['u'])
-        line_bot_api.push_message(line_user_id, message)
+        push_to_id = get_push_id(payload['u'])
+        print (push_to_id)
+        line_bot_api.push_message(push_to_id, message)
         return 0
     elif topic == "/line/gl1/lassie/report":
         payload = json.loads(message.payload.decode())
