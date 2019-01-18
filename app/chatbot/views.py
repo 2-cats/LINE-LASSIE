@@ -4,16 +4,15 @@ from flask import Flask, abort, current_app, render_template, request
 from flask_mqtt import Mqtt
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import (AudioMessage, FollowEvent, ImageMessage,
+from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
                             LocationMessage, MessageEvent, PostbackEvent,
                             StickerMessage, TextMessage, TextSendMessage,
-                            UnfollowEvent, JoinEvent)
+                            UnfollowEvent)
 
 from . import chatbot
-from .bind import bind_room_or_group_id
 from .. import db
-from .abnormal import device_list_message_for_alarmlist,summary
-from .bind import check_bind
+from .abnormal import device_list_message_for_alarmlist, summary
+from .bind import bind_member, check_bind
 from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
@@ -60,17 +59,6 @@ def handle_follow(event):
     line_bot_api.reply_message(event.reply_token, message)
     return 0
 
-@handler.add(JoinEvent)
-def handle_join(event):
-    line_user_id = event.source.user_id
-    if check_bind(line_user_id):
-        if event.source.type == "group":
-            source_id = event.source.group_id
-        if event.source.type == "room":
-            source_id = event.source.room_id
-        bind_room_or_group_id(source_id, event.source.type, line_user_id)
-        return 0
-
 @handler.add(UnfollowEvent)
 def handle_unfollow(event):
     '''
@@ -86,39 +74,48 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
-    if message_text == "get_me_line_user_id":
-        message = TextSendMessage(text=str(line_user_id))
+    if event.source.type == 'user':
+        if message_text == "get_me_line_user_id":
+            message = TextSendMessage(text=str(line_user_id))
+            line_bot_api.reply_message(event.reply_token, message)
+            return 0
+
+        # Check user is bind
+        if check_bind(line_user_id):
+            if message_text == "異常總覽":
+                message = TextSendMessage(text='稍等一下！我正在搜尋您的萊西...')
+                line_bot_api.reply_message(event.reply_token, message)
+                device_list_message_for_alarmlist(line_user_id)
+                return 0
+            if message_text == "聯絡我們":
+                message = contact_us(line_user_id)
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+            if message_text == "設備清單":
+                message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
+                line_bot_api.reply_message(event.reply_token, message)
+                device_list_message(line_user_id)
+                return 0
+            if message_text == "今日報表":
+                message = make_report(mqtt, line_user_id)
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+            message = alert_no_action_message(line_user_id)
+            line_bot_api.reply_message(event.reply_token, message)
+            return 0
+        message = alert_to_bind_message(line_user_id)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
-
-    # Check user is bind
-    if check_bind(line_user_id):
-
-        if message_text == "異常總覽":
-            message = TextSendMessage(text='稍等一下！我正在搜尋您的萊西...')
-            line_bot_api.reply_message(event.reply_token, message)
-            device_list_message_for_alarmlist(line_user_id)
-            return 0
-        if message_text == "聯絡我們":
-            message = contact_us(line_user_id)
+    elif event.source.type == 'room':
+        if message_text == "綁定萊西":
+            message = bind_member(line_user_id, event.source.room_id, 'room')
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-        if message_text == "設備清單":
-            message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
-            line_bot_api.reply_message(event.reply_token, message)
-            device_list_message(line_user_id)
-            return 0
-
-        if message_text == "今日報表":
-            message = make_report(mqtt, line_user_id)
+    elif event.source.type == 'group':
+        if message_text == "綁定萊西":
+            message = bind_member(line_user_id, event.source.group_id, 'group')
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-        message = alert_no_action_message(line_user_id)
-        line_bot_api.reply_message(event.reply_token, message)
-        return 0
-    message = alert_to_bind_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
 
 # Postback Event
 @handler.add(PostbackEvent)
