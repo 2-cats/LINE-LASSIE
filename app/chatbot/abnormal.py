@@ -253,7 +253,7 @@ def summary(line_user_id,postback_data):
                         ),
                         TextComponent(
                             text=(datetime.datetime.now() + datetime.timedelta(hours=0)).strftime(
-                                '%Y-%m-%d %H:%M:%S'),
+                                            '%Y-%m-%d %H:%M:%S'),
                             weight='regular',
                             color='#aaaaaa',
                             margin='md',
@@ -277,10 +277,11 @@ def device_list_message_for_alarmlist(line_user_id):
     devices_data = get_device_list_data_for_alarmlist(line_user_id)
     if devices_data:
         line_bot_api.push_message(line_user_id, TextSendMessage(text="搜尋異常萊西中..."))
-        return have_device_message_for_alarmlist(line_user_id, devices_data)
+        line_bot_api.push_message(line_user_id,have_device_message_for_alarmlist(line_user_id, devices_data))
     else:
-        return no_device_message_for_alarmlist(line_user_id)
-
+        line_bot_api.push_message(
+            line_user_id, no_device_message_for_alarmlist(line_user_id)
+        )
 def have_device_message_for_alarmlist(line_user_id, devices_data):
     carousel_template_columns = []
     for device_data in devices_data:
@@ -313,7 +314,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                                 size='lg',
                             ),
                             ButtonComponent(
-                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']])),
+                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']]),display_text='查詢異常總覽...'),
                                 flex=100,
                                 size='xl',
                                 weight='bold',
@@ -327,7 +328,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                 carousel_template_columns.append(bubble_template)
 
     if carousel_template_columns == []:
-        line_bot_api.push_message(line_user_id, TextSendMessage(text='未偵測到異常萊西！！'))
+        message=TextSendMessage(text='未偵測到異常萊西！！')
     else:
         message = FlexSendMessage(
             alt_text='異常設備清單',
@@ -335,15 +336,14 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                 contents=carousel_template_columns
             )
         )
-        line_bot_api.push_message(line_user_id, message)
+    return message
+
 def no_device_message_for_alarmlist(line_user_id):
-    line_bot_api.push_message(
-        line_user_id,
-        TextSendMessage(
-            text='搜尋不到任何萊西！'
-        )
+    return TextSendMessage(
+        text='搜尋不到任何萊西！'
     )
 
+    return message
 def get_device_list_data_for_alarmlist(line_user_id):
     user = User.query.filter_by(
         line_user_id=line_user_id
