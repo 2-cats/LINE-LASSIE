@@ -39,7 +39,6 @@ def handle_mqtt_message(client, userdata, message):
         payload = json.loads(message.payload.decode())
         message = lassie_alarm_message(payload)
         push_to_id = get_push_id(payload['u'])
-        print(push_to_id)
         line_bot_api.push_message(push_to_id, message)
         return 0
     elif topic == "/line/gl1/lassie/report":
