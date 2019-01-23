@@ -418,7 +418,6 @@ class SummaryForAbnormal(unittest.TestCase):
 
         ]
         #self.maxDiff=None
-
     @responses.activate
     def test_summary(self):
         responses.add(

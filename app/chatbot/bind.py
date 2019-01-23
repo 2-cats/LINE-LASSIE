@@ -34,7 +34,6 @@ def bind_member(line_user_id, source_id, source_type):
         content = '綁定失敗'
     return TextSendMessage(text=content)
 
-
 def check_room_and_group_bind(source_id, source_type):
     user = Member.query.filter_by(
         source_id=source_id,
@@ -43,3 +42,4 @@ def check_room_and_group_bind(source_id, source_type):
     if user is None:
         return False
     return True
+
