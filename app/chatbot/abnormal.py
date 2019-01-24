@@ -166,7 +166,8 @@ def summary(line_user_id,postback_data):
                                         margin='md',
                                         align='end',
                                         size='xs',
-                                        gravity="top"
+                                        gravity="top",
+                                        flex = 5
                                     ),
 
                                 ]
