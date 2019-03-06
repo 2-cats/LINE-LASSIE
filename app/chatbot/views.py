@@ -1,7 +1,7 @@
 import json
 
 from flask import Flask, abort, current_app, render_template, request
-from flask_mqtt import Mqtt
+
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
@@ -17,7 +17,7 @@ from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
-from .report import make_report
+from .report import make_report_message
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -26,12 +26,6 @@ app.config.from_pyfile('config.py')
 line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
-# MQTT
-app.config['MQTT_BROKER_URL'] = app.config["MQTT_HOSTNAME"]
-app.config['MQTT_BROKER_PORT'] = app.config["MQTT_PORT"]
-app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
-app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
-mqtt = Mqtt(app)
 
 @chatbot.route("/callback", methods=['POST'])
 def callback():
@@ -55,7 +49,7 @@ def handle_follow(event):
     '''
     Handle follow event
     '''
-    message = follow_message(event.source.user_id)
+    message = follow_message()
     line_bot_api.reply_message(event.reply_token, message)
     return 0
 
@@ -99,13 +93,13 @@ def handle_message(event):
                 device_list_message(line_user_id)
                 return 0
             if message_text == "今日報表":
-                message = make_report(mqtt, line_user_id)
+                message = make_report_message(line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-            message = alert_no_action_message(line_user_id)
+            message = alert_no_action_message()
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-        message = alert_to_bind_message(line_user_id)
+        message = alert_to_bind_message()
         line_bot_api.reply_message(event.reply_token, message)
         return 0
     elif source_type == 'room':
@@ -125,9 +119,10 @@ def handle_postback(event):
     line_user_id = event.source.user_id
     # data="action, var1, var2, ... ,varN"
     # Convet to postback_data: [action, var1, var2, ... ,varN]
-    postback_data = event.postback.data.split(",") 
+    postback_data = event.postback.data.split(",")
     if postback_data[0] == "abnormal":
-        message = summary(line_user_id,postback_data)
+        thing_id = postback_data[1]
+        message = summary(line_user_id, thing_id)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
@@ -140,7 +135,7 @@ def handle_loaction_message(event):
     line_user_id = event.source.user_id
     source_type = event.source.type
     if source_type == 'user':
-        message = alert_no_action_message(line_user_id)
+        message = alert_no_action_message()
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
@@ -150,7 +145,7 @@ def handle_image_message(event):
     source_type = event.source.type
     if source_type == 'user':
         line_user_id = event.source.user_id
-        message = alert_no_action_message(line_user_id)
+        message = alert_no_action_message()
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
@@ -160,7 +155,7 @@ def handle_audio_message(event):
     source_type = event.source.type
     if source_type == 'user':
         line_user_id = event.source.user_id
-        message = alert_no_action_message(line_user_id)
+        message = alert_no_action_message()
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
@@ -170,6 +165,6 @@ def handle_sticker_message(event):
     source_type = event.source.type
     if source_type == 'user':
         line_user_id = event.source.user_id
-        message = alert_no_action_message(line_user_id)
+        message = alert_no_action_message()
         line_bot_api.reply_message(event.reply_token, message)
         return 0

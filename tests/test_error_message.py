@@ -19,7 +19,7 @@ class NoActionMessageTestCase(unittest.TestCase):
         self.tested = LineBotApi('channel_secret')
         # test data
 
-        self.result_message = alert_no_action_message('line_user_id')
+        self.result_message = alert_no_action_message()
         self.expected_message = [
             {
                 "packageId":2,
@@ -108,7 +108,7 @@ class NoBindMessageTestCase(unittest.TestCase):
         self.tested = LineBotApi('channel_secret')
         # test data
 
-        self.result_message = alert_to_bind_message('line_user_id')
+        self.result_message = alert_to_bind_message()
         self.expected_message = [
             {
                 "type":"template",
