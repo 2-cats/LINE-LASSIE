@@ -74,7 +74,9 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
-    if event.source.type == 'user':
+    source_type = event.source.type
+
+    if source_type == 'user':
         if message_text == "get_me_line_user_id":
             message = TextSendMessage(text=str(line_user_id))
             line_bot_api.reply_message(event.reply_token, message)
@@ -106,12 +108,12 @@ def handle_message(event):
         message = alert_to_bind_message(line_user_id)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
-    elif event.source.type == 'room':
+    elif source_type == 'room':
         if message_text == "綁定萊西":
             message = bind_member(line_user_id, event.source.room_id, 'room')
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-    elif event.source.type == 'group':
+    elif source_type == 'group':
         if message_text == "綁定萊西":
             message = bind_member(line_user_id, event.source.group_id, 'group')
             line_bot_api.reply_message(event.reply_token, message)
@@ -136,30 +138,38 @@ def handle_loaction_message(event):
     Handle location message Event.
     """
     line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        message = alert_no_action_message(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle image message event
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image_message(event):
-    line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        line_user_id = event.source.user_id
+        message = alert_no_action_message(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle audio message event
 @handler.add(MessageEvent, message=AudioMessage)
 def handle_audio_message(event):
-    line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        line_user_id = event.source.user_id
+        message = alert_no_action_message(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle sticker message event
 @handler.add(MessageEvent, message=StickerMessage)
 def handle_sticker_message(event):
-    line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        line_user_id = event.source.user_id
+        message = alert_no_action_message(line_user_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0

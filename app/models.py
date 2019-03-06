@@ -55,7 +55,5 @@ class Member(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted_at = db.Column(db.DateTime)
 
-    user = db.relationship("User", back_populates="members", lazy='noload')
-
     def __repr__(self):
         return '<Member %r>' % self.source_id
