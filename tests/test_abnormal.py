@@ -201,7 +201,7 @@ class SummaryForAbnormal(unittest.TestCase):
                                     {
                                         "color": "#030303",
                                         "size": "lg",
-                                        "text": "Sensor",
+                                        "text": "感測器",
                                         "type": "text",
                                         "weight": "bold"
                                     },
@@ -210,7 +210,7 @@ class SummaryForAbnormal(unittest.TestCase):
                                         "color": "#030303",
                                         "margin": "md",
                                         "size": "lg",
-                                        "text": "Value",
+                                        "text": "數值",
                                         "type": "text",
                                         "weight": "bold"
                                     }
