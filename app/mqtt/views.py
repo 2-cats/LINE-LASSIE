@@ -8,7 +8,7 @@ from . import mqtt
 from .. import db
 from .alarm import lassie_alarm_message
 from .report import lassie_report
-from .user import username_to_line_user_id
+from .user import get_push_id, username_to_line_user_id
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -36,7 +36,7 @@ def handle_mqtt_message(client, userdata, message):
     if topic == "/line/gl1/lassie/alarm":
         payload = json.loads(message.payload.decode())
         message = lassie_alarm_message(payload)
-        line_user_id = username_to_line_user_id(payload['u'])
+        line_user_id = get_push_id(payload['u'])
         line_bot_api.push_message(line_user_id, message)
         return 0
     elif topic == "/line/gl1/lassie/report":

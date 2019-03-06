@@ -69,7 +69,7 @@ def summary(line_user_id, thing_id):
                         layout='vertical',
                         contents=[
                             TextComponent(
-                                text='Camera Report',
+                                text='圖片報告',
                                 wrap=True,
                                 color='#1DB446',
                                 size='xxl',
@@ -97,13 +97,13 @@ def summary(line_user_id, thing_id):
                                 margin='md',
                                 contents=[
                                     TextComponent(
-                                        text='Sensor',
+                                        text='感測器',
                                         weight='bold',
                                         color='#030303',
                                         size='lg'
                                     ),
                                     TextComponent(
-                                        text='Value',
+                                        text='數值',
                                         weight='bold',
                                         color='#030303',
                                         margin='md',
@@ -150,7 +150,7 @@ def summary(line_user_id, thing_id):
                                 margin='md',
                                 contents=[
                                     TextComponent(
-                                        text='Date',
+                                        text='日期',
                                         weight='regular',
                                         align='start',
                                         color='#aaaaaa',
@@ -193,7 +193,7 @@ def summary(line_user_id, thing_id):
             layout='vertical',
             contents=[
                TextComponent(
-                    text='Report',
+                    text='報告',
                     wrap=True,
                     color='#1DB446',
                     size='xxl',
@@ -221,13 +221,13 @@ def summary(line_user_id, thing_id):
                     margin='md',
                     contents=[
                 TextComponent(
-                    text='Sensor',
+                    text='感測器',
                     weight='bold',
                     color='#030303',
                     size='lg'
                     ),
                 TextComponent(
-                    text='Value',
+                    text='數值',
                     weight='bold',
                     color='#030303',
                     margin='md',
@@ -252,7 +252,7 @@ def summary(line_user_id, thing_id):
                     margin='md',
                     contents=[
                         TextComponent(
-                            text='Date',
+                            text='日期',
                             weight='regular',
                             align='start',
                             color='#aaaaaa',
