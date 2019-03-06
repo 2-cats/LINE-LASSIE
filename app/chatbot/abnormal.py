@@ -9,8 +9,6 @@ from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             ImageSendMessage, PostbackAction,
                             SeparatorComponent, TextComponent, TextSendMessage)
 
-import config
-
 from ..models import User
 
 app = Flask(__name__, instance_relative_config=True)
@@ -19,16 +17,15 @@ app.config.from_pyfile('config.py')
 line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 
 
-def summary(line_user_id,postback_data):
-    user = User.query.filter_by(
-        line_user_id=line_user_id
-    ).first()
+def summary(line_user_id, thing_id):
+
+    # Get things shadow
     things_shadow = requests.get(
         ''.join([
             'https://api.sensor.live/api/projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/things/',
-            postback_data[1],
+            thing_id,
             '/shadow'
         ]),
         headers={
@@ -37,10 +34,11 @@ def summary(line_user_id,postback_data):
         }
     )
     things_shadow_json = json.loads(things_shadow.text)
+
     bubble_template_columns = []
     for thing_name in things_shadow_json['state']['reported']['errs']:
-        if thing_name.startswith("cam") != 1:
-            list = BoxComponent(
+        if not thing_name.startswith("cam"):
+            message = BoxComponent(
                 layout='horizontal',
                 flex=1,
                 spacing='sm',
@@ -61,8 +59,9 @@ def summary(line_user_id,postback_data):
 
                 ]
             )
-            bubble_template_columns.append(list)
+            bubble_template_columns.append(message)
         else:
+            message_list = []
             for surv in things_shadow_json['state']['reported'][thing_name]['errs']:
                 bubble_for_cam = BubbleContainer(
                     direction='ltr',
@@ -177,9 +176,17 @@ def summary(line_user_id,postback_data):
                     ),
 
                 )
-                line_bot_api.push_message(line_user_id, FlexSendMessage(alt_text='異常總表', contents=bubble_for_cam))
-                line_bot_api.push_message(line_user_id, ImageSendMessage(original_content_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url']),
-                                                                         preview_image_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url'])))
+                message = FlexSendMessage(
+                    alt_text='異常總表',
+                    contents=bubble_for_cam
+                )
+                message_list.append(message)
+                message = ImageSendMessage(
+                    original_content_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url']),
+                    preview_image_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url'])
+                )
+                message_list.append(message)
+                line_bot_api.push_message(line_user_id, message_list)
     bubble = BubbleContainer(
         direction='ltr',
         header=BoxComponent(
@@ -194,7 +201,7 @@ def summary(line_user_id,postback_data):
                     margin='md',
                 ),
                TextComponent(
-                    text=postback_data[1],
+                    text=thing_id,
                     size='xs',
                     color='#aaaaaa',
                 ),
@@ -271,20 +278,25 @@ def summary(line_user_id,postback_data):
         ),
 
     )
-    message = FlexSendMessage(alt_text='異常總表', contents=bubble)
+    message = FlexSendMessage(
+        alt_text='異常總表',
+        contents=bubble
+    )
     return message
 
 
 def device_list_message_for_alarmlist(line_user_id):
     devices_data = get_device_list_data_for_alarmlist(line_user_id)
     if devices_data:
-        line_bot_api.push_message(line_user_id, TextSendMessage(text="搜尋異常萊西中..."))
-        line_bot_api.push_message(line_user_id,have_device_message_for_alarmlist(line_user_id, devices_data))
+        message_list = []
+        message = have_device_message_for_alarmlist(devices_data)
+        message_list.append(message)
+        line_bot_api.push_message(line_user_id, message_list)
     else:
-        line_bot_api.push_message(
-            line_user_id, no_device_message_for_alarmlist(line_user_id)
-        )
-def have_device_message_for_alarmlist(line_user_id, devices_data):
+        message = no_device_message_for_alarmlist()
+        line_bot_api.push_message(line_user_id, message)
+
+def have_device_message_for_alarmlist(devices_data):
     carousel_template_columns = []
     for device_data in devices_data:
         things_shadow = requests.get(
@@ -301,9 +313,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
             }
         )
         things_shadow_json = json.loads(things_shadow.text)
-        if things_shadow_json is None:
-            pass
-        elif things_shadow_json !={}:
+        if things_shadow_json is not None:
             if things_shadow_json['state']['reported']['errs'] !=[]:
                 bubble_template = BubbleContainer(
                     body=BoxComponent(
@@ -340,16 +350,18 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
         )
     return message
 
-def no_device_message_for_alarmlist(line_user_id):
-    return TextSendMessage(
+def no_device_message_for_alarmlist():
+    message = TextSendMessage(
         text='搜尋不到任何萊西！'
     )
-
     return message
+
 def get_device_list_data_for_alarmlist(line_user_id):
     user = User.query.filter_by(
-        line_user_id=line_user_id
+        line_user_id=line_user_id,
+        deleted_at=None
     ).first()
+
     things_response = requests.get(
         ''.join([
             'https://api.sensor.live/api/projects/',
@@ -363,6 +375,7 @@ def get_device_list_data_for_alarmlist(line_user_id):
             'Authorization': app.config['SENSOR_LIVE_TOKEN']
         }
     )
+
     if things_response.status_code == 200:
         thing_data = []
         things_response_json = json.loads(things_response.text)

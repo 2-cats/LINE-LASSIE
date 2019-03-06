@@ -17,7 +17,7 @@ class FollowTestCase(unittest.TestCase):
         '''
         self.tested = LineBotApi('channel_secret')
         # test data
-        self.result_message = follow_message('line_user_id')
+        self.result_message = follow_message()
         self.expected_message = [
             {
                 "type":"flex",

@@ -11,27 +11,35 @@ from ..models import Member, User
 
 # Check user is bind
 def check_bind(line_user_id):
-    user = User.query.filter_by(line_user_id=line_user_id).first()
+    user = User.query.filter_by(
+        line_user_id=line_user_id,
+        deleted_at=None
+    ).first()
     if user:
         return True
     return False
 
 def bind_member(line_user_id, source_id, source_type):
-    if not check_room_and_group_bind(source_id, source_type):
-        user = User.query.filter_by(line_user_id=line_user_id).one()
+    if check_room_and_group_bind(source_id, source_type):
+        content = '綁定失敗'
+    else:
+        user = User.query.filter_by(
+            line_user_id=line_user_id,
+            deleted_at=None
+        ).first()
+
         member = Member(
-                user_id=user.id,
-                source_id=source_id,
-                source_type=source_type
-            )
+            user_id=user.id,
+            source_id=source_id,
+            source_type=source_type
+        )
         db.session.add(member)
         try:
             db.session.commit()
+            content = '綁定成功'
         except:
-            pass
-        content = '綁定成功'
-    else:
-        content = '綁定失敗'
+            content = '綁定失敗'
+        
     return TextSendMessage(text=content)
 
 def check_room_and_group_bind(source_id, source_type):
@@ -42,4 +50,3 @@ def check_room_and_group_bind(source_id, source_type):
     if user is None:
         return False
     return True
-

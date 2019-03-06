@@ -1,8 +1,11 @@
+import datetime
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, TextComponent)
+
 from ..models import User
 
-def follow_message(line_user_id):
+
+def follow_message():
     bubble_template = BubbleContainer(
         body=BoxComponent(
             layout='vertical',
@@ -10,7 +13,7 @@ def follow_message(line_user_id):
                 TextComponent(
                     text='歡迎加入',
                     wrap=True,
-                    weight= 'bold',
+                    weight='bold',
                     size='lg',
                 ),
                 TextComponent(
@@ -23,12 +26,26 @@ def follow_message(line_user_id):
         )
     )
     message = FlexSendMessage(
-        alt_text='歡迎您的加入', contents=bubble_template)
+        alt_text='歡迎您的加入',
+        contents=bubble_template
+    )
     return message
 
 def unfollow(line_user_id):
-    user = User.query.filter_by(line_user_id=line_user_id).first()
-    try:
-        User.link_rm_to_guest(user)
-    except:
-        pass
+    user = User.query.filter_by(
+        line_user_id=line_user_id,
+        deleted_at=None
+    ).first()
+    user.deleted_at = datetime.datetime.now()
+    if user:
+        db.session.add(user)
+
+        try:
+            User.link_rm_to_guest(user)
+        except:
+            pass
+
+        try:
+            db.session.commit()
+        except:
+            pass

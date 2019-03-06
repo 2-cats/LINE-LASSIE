@@ -10,46 +10,53 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    {% if check_result == 'success' %}
-      <title>綁定成功</title>
-    {% else %}
+    {% if messages %}
       <title>綁定失敗</title>
+    {% else %}
+      <title>綁定成功</title>
     {% endif %}
   </head>
   <body>
-  <div class="container">
-    {% if check_result == 'success' %}
-      <picture>
-        <img class="rounded-circle img-fluid center-block" src="{{ url_for('static', filename='img/checked_sm.png') }}" class="img-fluid img-thumbnail">
-      </picture>
-      <div class="col-md-4 text-center"> 
-        <form method='GET' action='/line/bind_email'>
-          <div class="form-group">
-            <div class="col-md-4 text-center"> 
-              <button id="closewindowbutton" type="submit" class="btn btn-link">關閉視窗</button>
-            </div>
+
+  <div class="container p-2">
+    {% if messages %}
+      <div class="row"> 
+        <div class="col-4"></div>
+        <div class="col-4">
+          <picture>
+            <img class="rounded-circle img-fluid center-block" src="{{ url_for('static', filename='img/cancel_sm.png') }}" class="img-fluid img-thumbnail">
+          </picture>
+        </div>
+      </div>
+
+      <div class="row p-2">
+        <div class="col-1"></div>
+        <div class="col-10">
+          <div class="alert alert-danger" role="alert">
+            {% for message in messages %}
+              {{ message }}
+            {% endfor %}
           </div>
-        </form>
+        </div>
+        <div class="col-1"></div>
+      </div>
+      
+      <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4">
+          <a href="{{ url_for('liff.line_bind_email_view') }}">重新綁定</a>
+        </div>
       </div>
     {% else %}
-      <picture>
-        <img class="rounded-circle img-fluid center-block" src="{{ url_for('static', filename='img/cancel_sm.png') }}" class="img-fluid img-thumbnail">
-      </picture>
-      <div class="alert alert-danger" role="alert">
-      {{ check_result }}
-      </div>
-      <div class="col-md-4 text-center"> 
-        <form method='GET' action='/line/bind_email'>
-          <div class="form-group">
-            <div class="col-md-4 text-center"> 
-              <button type="submit" class="btn btn-link">重新綁定？</button>
-            </div>
-            <div class="col-md-4 text-center"> 
-              <button id="closewindowbutton" type="submit" class="btn btn-link">關閉視窗</button>
-            </div>
-          </div>
-        </form>
-      </div>
+      <div class='row p-2'>
+        <div class="col-4"></div>
+        <div class="col-4"> 
+          <picture>
+            <img class="rounded-circle img-fluid" src="{{ url_for('static', filename='img/checked_sm.png') }}" class="img-fluid img-thumbnail">
+          </picture>
+          <button id="closewindowbutton" type="submit" class="btn btn-link">關閉視窗</button>
+        </div>
+      <div>
     {% endif %}
   </div>
 
