@@ -20,8 +20,9 @@ line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
 
 
 def summary(line_user_id,postback_data):
-    user = User.query.filter_by(
-        line_user_id=line_user_id
+    user = User.query.filter(
+        User.line_user_id==line_user_id,
+        User.deleted_at==None
     ).first()
     things_shadow = requests.get(
         ''.join([
@@ -284,6 +285,7 @@ def device_list_message_for_alarmlist(line_user_id):
         line_bot_api.push_message(
             line_user_id, no_device_message_for_alarmlist(line_user_id)
         )
+
 def have_device_message_for_alarmlist(line_user_id, devices_data):
     carousel_template_columns = []
     for device_data in devices_data:
