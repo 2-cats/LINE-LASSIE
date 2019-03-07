@@ -64,7 +64,8 @@ def query_user_data(email, phone, line_user_id):
                             else:
                                 bind_line_user_id(end_user['username'], line_user_id)
                                 return 0
-    return messages.append('找不到使用者')
+    messages.append('找不到使用者')
+    return messages
 
 # Check aws_username is exist
 def check_username_exist(username):
@@ -87,9 +88,10 @@ def check_line_user_id_exist(line_user_id):
 
 # Bind user to RDS table: USERS
 def bind_line_user_id(username, line_user_id):
-    user = User()
-    user.aws_user_name = username,
-    user.line_user_id = line_user_id
+    user = User(
+        line_user_id='line_user_id',
+        aws_user_name='aws_user_name'
+    )
 
     db.session.add(user)
     try:

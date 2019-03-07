@@ -284,7 +284,6 @@ def summary(line_user_id, thing_id):
     )
     return message
 
-
 def device_list_message_for_alarmlist(line_user_id):
     devices_data = get_device_list_data_for_alarmlist(line_user_id)
     if devices_data:
@@ -340,7 +339,7 @@ def have_device_message_for_alarmlist(devices_data):
                 carousel_template_columns.append(bubble_template)
 
     if carousel_template_columns == []:
-        message=TextSendMessage(text='未偵測到異常萊西！！')
+        message = TextSendMessage(text='未偵測到異常萊西！！')
     else:
         message = FlexSendMessage(
             alt_text='異常設備清單',

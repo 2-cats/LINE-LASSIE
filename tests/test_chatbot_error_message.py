@@ -16,8 +16,6 @@ class NoActionMessageTestCase(unittest.TestCase):
         '''
         Set up test
         '''
-        self.tested = LineBotApi('channel_secret')
-        # test data
 
         self.result_message = alert_no_action_message()
         self.expected_message = [
@@ -71,30 +69,13 @@ class NoActionMessageTestCase(unittest.TestCase):
             }
         ]
 
-    @responses.activate
     def test_no_action_message(self):
         '''
         Test reply message
         '''
-        responses.add(
-            responses.POST,
-            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply',
-            json={}, status=200
-        )
-
-        self.tested.reply_message('replyToken', self.result_message)
-        
-        request = responses.calls[0].request
         self.assertEqual(
-            request.url,
-            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply')
-        self.assertEqual(request.method, 'POST')
-        self.assertEqual(
-            json.loads(request.body),
-            {
-                'replyToken': 'replyToken',
-                'messages': self.expected_message
-            }
+            (json.loads(str(self.result_message))),
+            self.expected_message
         )
 
 class NoBindMessageTestCase(unittest.TestCase):
@@ -105,51 +86,56 @@ class NoBindMessageTestCase(unittest.TestCase):
         '''
         Set up test
         '''
-        self.tested = LineBotApi('channel_secret')
-        # test data
-
         self.result_message = alert_to_bind_message()
-        self.expected_message = [
-            {
-                "type":"template",
-                "altText":"綁定帳號",
-                "template":{
-                    "actions":[
+        self.expected_message = {
+            "altText":"綁定帳號",
+            "contents":{
+                "body":{
+                    "contents":[
                         {
-                            "label":"點我進行綁定",
-                            "type":"uri",
-                            "uri":"line://app/1633151989-5BJ0B9EZ"
+                            "size":"lg",
+                            "text":"尚未綁定服務",
+                            "type":"text",
+                            "weight":"bold",
+                            "wrap":True
+                        },
+                        {
+                            "margin":"md",
+                            "size":"md",
+                            "text":"您好，我是 Lassie！第一次使用嗎？完成簡單的綁定只需要三分鐘，就可以享用完整的服務！",
+                            "type":"text",
+                            "wrap":True
                         }
                     ],
-                    "text":"您好，我是 Lassie！第一次使用嗎？完成簡單的綁定只需要三分鐘，就可以享用完整的服務！",
-                    "title":"綁定服務",
-                    "type":"buttons"
-                }
-            }
-        ]
+                    "layout":"vertical",
+                    "type":"box"
+                },
+                "footer":{
+                    "contents":[
+                        {
+                            "action":{
+                                "label":"點我進行綁定",
+                                "type":"uri",
+                                "uri":"line://app/1633151989-5BJ0B9EZ"
+                            },
+                            "height":"sm",
+                            "style":"link",
+                            "type":"button"
+                        }
+                    ],
+                "layout":"vertical",
+                "type":"box"
+                },
+                "type":"bubble"
+            },
+            "type":"flex"
+        }
 
-    @responses.activate
     def test_to_bind_message(self):
         '''
         Test reply to bind message
         '''
-        responses.add(
-            responses.POST,
-            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply',
-            json={}, status=200
-        )
-
-        self.tested.reply_message('replyToken', self.result_message)
-        
-        request = responses.calls[0].request
         self.assertEqual(
-            request.url,
-            LineBotApi.DEFAULT_API_ENDPOINT + '/v2/bot/message/reply')
-        self.assertEqual(request.method, 'POST')
-        self.assertEqual(
-            json.loads(request.body),
-            {
-                'replyToken': 'replyToken',
-                'messages': self.expected_message
-            }
+            (json.loads(str(self.result_message))),
+            self.expected_message
         )
