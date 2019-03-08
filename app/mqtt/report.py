@@ -11,7 +11,6 @@ app.config.from_pyfile('config.py')
 
 def lassie_report(mqtt_message):
     return lassie_report_message(mqtt_message['d'])
-    
 
 def lassie_report_message(data):
     thing_name = data.split(',')
@@ -52,7 +51,7 @@ def lassie_report_message(data):
                             uri=''.join([
                                app.config['REPORT_LINE_LIFF_URL'],
                                "?data=",
-                               urllib.parse.quote_plus(str(data)) 
+                               urllib.parse.quote_plus(str(data))
                             ])
                         )
                     )

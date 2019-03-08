@@ -37,7 +37,6 @@ def get_push_id(username):
         user_result = cursor.fetchone()
         psuh_id = user_result[0]
     else:
-       psuh_id = member_result[0]
+        psuh_id = member_result[0]
     database.close()
     return psuh_id
-

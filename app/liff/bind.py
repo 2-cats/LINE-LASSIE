@@ -3,6 +3,7 @@ LINE account with Goodlinker AWS user
 
 Created at 2018/12/26 by Eric
 '''
+import json
 import requests
 from flask import Flask
 from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
@@ -28,22 +29,23 @@ def query_user_data(email, phone, line_user_id):
         return messages
 
     # Query sensor.live end users list
-    headers = {
-        'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-        'Authorization': app.config['SENSOR_LIVE_TOKEN']
-    }
     end_users_list = requests.get(
         ''.join(
             [
                 app.config['SENSOR_LIVE_API_URL'],
-                'projects/',
-                app.config['SENSOR_LIVE_PROJECT_ID'],
-                '/end_users/list'
+                'projects/{project}/end_users/list'
             ]
         ),
-        headers=headers
+        params={
+            'porject': app.config['SENSOR_LIVE_PROJECT_ID']
+        },
+        headers={
+            'Account': app.config['SENSOR_LIVE_ACCOUNT'],
+            'Authorization': app.config['SENSOR_LIVE_TOKEN']
+        }
     )
-    end_users_list = end_users_list.json()
+    end_users_list = json.loads(end_users_list.text)
+
     for end_user in end_users_list['data']:
         if 'phone' in end_user:
             if end_user['phone'] == phone:

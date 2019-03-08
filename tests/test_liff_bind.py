@@ -1,7 +1,4 @@
-import datetime
 import unittest
-
-from flask import Flask
 
 from app import create_app, db
 from app.liff.bind import (bind_line_user_id, bind_user,
@@ -10,8 +7,6 @@ from app.liff.bind import (bind_line_user_id, bind_user,
 from app.models import User
 from config import config
 
-app = Flask(__name__)
-app.config.from_object(config['testing'])
 
 class BindTestCase(unittest.TestCase):
 
@@ -65,6 +60,14 @@ class BindTestCase(unittest.TestCase):
                 'x'
             ),
             ['找不到使用者']
+        )
+        self.assertEquals(
+            query_user_data(
+                'smart032410@gmail.com',
+                '+886981263972',
+                'x'
+            ),
+            0
         )
         return 0
 

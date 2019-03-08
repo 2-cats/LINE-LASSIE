@@ -1,17 +1,10 @@
 import json
 import unittest
 
-import responses
-from flask import Flask
-from linebot import LineBotApi
-
 from app import create_app, db
 from app.chatbot.follow import follow_message, unfollow
 from app.models import User
 from config import config
-
-app = Flask(__name__)
-app.config.from_object(config['testing'])
 
 class FollowTestCase(unittest.TestCase):
     '''

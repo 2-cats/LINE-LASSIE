@@ -11,7 +11,7 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
 
 from . import chatbot
 from .. import db
-from .abnormal import device_list_message_for_alarmlist, summary
+from .abnormal import alarm_list_message, summary
 from .bind import bind_member, check_bind
 from .contact import contact_us
 from .device import device_list_message
@@ -81,7 +81,8 @@ def handle_message(event):
             if message_text == "異常總覽":
                 message = TextSendMessage(text='稍等一下！我正在搜尋您的萊西...')
                 line_bot_api.reply_message(event.reply_token, message)
-                device_list_message_for_alarmlist(line_user_id)
+                message = alarm_list_message(line_user_id)
+                line_bot_api.push_message(line_user_id, message)
                 return 0
             if message_text == "聯絡我們":
                 message = contact_us(line_user_id)
@@ -90,7 +91,8 @@ def handle_message(event):
             if message_text == "設備清單":
                 message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
                 line_bot_api.reply_message(event.reply_token, message)
-                device_list_message(line_user_id)
+                message = device_list_message(line_user_id)
+                line_bot_api.push_message(line_user_id, message)
                 return 0
             if message_text == "今日報表":
                 message = make_report_message(line_user_id)
@@ -122,7 +124,7 @@ def handle_postback(event):
     postback_data = event.postback.data.split(",")
     if postback_data[0] == "abnormal":
         thing_id = postback_data[1]
-        message = summary(line_user_id, thing_id)
+        message = summary(thing_id)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
