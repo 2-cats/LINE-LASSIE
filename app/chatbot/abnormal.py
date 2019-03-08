@@ -3,7 +3,6 @@ import json
 
 import requests
 from flask import Flask
-from linebot import LineBotApi
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             CarouselContainer, FlexSendMessage,
                             ImageSendMessage, PostbackAction,
@@ -14,28 +13,10 @@ from ..models import User
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
-
-
-def summary(line_user_id, thing_id):
-
-    # Get things shadow
-    things_shadow = requests.get(
-        ''.join([
-            'https://api.sensor.live/api/projects/',
-            app.config['SENSOR_LIVE_PROJECT_ID'],
-            '/things/',
-            thing_id,
-            '/shadow'
-        ]),
-        headers={
-            'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-            'Authorization': app.config['SENSOR_LIVE_TOKEN']
-        }
-    )
-    things_shadow_json = json.loads(things_shadow.text)
-
+def summary(thing_id):
+    things_shadow_json = get_shadow(thing_id)
     bubble_template_columns = []
+    message_list = []
     for thing_name in things_shadow_json['state']['reported']['errs']:
         if not thing_name.startswith("cam"):
             message = BoxComponent(
@@ -61,7 +42,6 @@ def summary(line_user_id, thing_id):
             )
             bubble_template_columns.append(message)
         else:
-            message_list = []
             for surv in things_shadow_json['state']['reported'][thing_name]['errs']:
                 bubble_for_cam = BubbleContainer(
                     direction='ltr',
@@ -166,7 +146,7 @@ def summary(line_user_id, thing_id):
                                         align='end',
                                         size='xs',
                                         gravity="top",
-                                        flex = 5
+                                        flex=5
                                     ),
 
                                 ]
@@ -186,7 +166,7 @@ def summary(line_user_id, thing_id):
                     preview_image_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url'])
                 )
                 message_list.append(message)
-                line_bot_api.push_message(line_user_id, message_list)
+    
     bubble = BubbleContainer(
         direction='ltr',
         header=BoxComponent(
@@ -282,30 +262,52 @@ def summary(line_user_id, thing_id):
         alt_text='異常總表',
         contents=bubble
     )
-    return message
+    message_list.append(message)
+    return message_list
 
-def device_list_message_for_alarmlist(line_user_id):
-    devices_data = get_device_list_data_for_alarmlist(line_user_id)
+def get_shadow(thing_id):
+    # Get things shadow
+    things_shadow = requests.get(
+        ''.join([
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/{project}/things/{thing}/shadow'
+        ]),
+        params={
+            'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
+            'thing': thing_id
+        },
+        headers={
+            'Account': app.config['SENSOR_LIVE_ACCOUNT'],
+            'Authorization': app.config['SENSOR_LIVE_TOKEN']
+        }
+    )
+    things_shadow_json = json.loads(things_shadow.text)
+    return things_shadow_json
+
+def alarm_list_message(line_user_id):
+    devices_data = get_alarm_list_data(line_user_id)
+    message_list = []
+    print (devices_data)
     if devices_data:
-        message_list = []
-        message = have_device_message_for_alarmlist(devices_data)
+        message = have_alarm_message(devices_data)
         message_list.append(message)
-        line_bot_api.push_message(line_user_id, message_list)
     else:
-        message = no_device_message_for_alarmlist()
-        line_bot_api.push_message(line_user_id, message)
+        message = no_alarm_message()
+        message_list.append(message)
+    return message_list
 
-def have_device_message_for_alarmlist(devices_data):
+def have_alarm_message(devices_data):
     carousel_template_columns = []
     for device_data in devices_data:
         things_shadow = requests.get(
             ''.join([
-                'https://api.sensor.live/api/projects/',
-                app.config['SENSOR_LIVE_PROJECT_ID'],
-                '/things/',
-                device_data['name'],
-                '/shadow'
+                app.config['SENSOR_LIVE_API_URL'],
+                'projects/{project}/things/{thing}/shadow'
             ]),
+            params={
+                'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
+                'thing':  device_data['name']
+            },
             headers={
                 'Account': app.config['SENSOR_LIVE_ACCOUNT'],
                 'Authorization': app.config['SENSOR_LIVE_TOKEN']
@@ -325,7 +327,16 @@ def have_device_message_for_alarmlist(devices_data):
                                 size='lg',
                             ),
                             ButtonComponent(
-                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']]),display_text='查詢異常總覽...'),
+                                action=PostbackAction(
+                                    label="異常總表",
+                                    data=','.join(
+                                        [
+                                            'abnormal',
+                                            device_data['name']
+                                        ]
+                                    ),
+                                    display_text='查詢異常總覽...'
+                                ),
                                 flex=100,
                                 size='xl',
                                 weight='bold',
@@ -349,13 +360,13 @@ def have_device_message_for_alarmlist(devices_data):
         )
     return message
 
-def no_device_message_for_alarmlist():
+def no_alarm_message():
     message = TextSendMessage(
         text='搜尋不到任何萊西！'
     )
     return message
 
-def get_device_list_data_for_alarmlist(line_user_id):
+def get_alarm_list_data(line_user_id):
     user = User.query.filter_by(
         line_user_id=line_user_id,
         deleted_at=None
@@ -363,12 +374,13 @@ def get_device_list_data_for_alarmlist(line_user_id):
 
     things_response = requests.get(
         ''.join([
-            'https://api.sensor.live/api/projects/',
-            app.config['SENSOR_LIVE_PROJECT_ID'],
-            '/end_users/',
-            user.aws_user_name,
-            '/resources?target=things'
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/{project}/end_users/{end_user_username}/resources?target=things',
         ]),
+        params={
+            'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
+            'end_user_username': user.aws_user_name
+        },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
             'Authorization': app.config['SENSOR_LIVE_TOKEN']
@@ -381,11 +393,13 @@ def get_device_list_data_for_alarmlist(line_user_id):
         for thing in things_response_json['data']:
             thing_response = requests.get(
                 ''.join([
-                    'https://api.sensor.live/api/projects/',
-                    app.config['SENSOR_LIVE_PROJECT_ID'],
-                    '/things/',
-                    thing['name']
+                    app.config['SENSOR_LIVE_API_URL'],
+                    'projects/{porject}/things/{thing}'
                 ]),
+                params={
+                    'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
+                    'thing': thing['name']
+                },
                 headers={
                     'Account': app.config['SENSOR_LIVE_ACCOUNT'],
                     'Authorization': app.config['SENSOR_LIVE_TOKEN']

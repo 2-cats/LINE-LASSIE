@@ -1,9 +1,6 @@
 import json
 import unittest
 
-import responses
-from linebot import LineBotApi
-
 from app.chatbot.report import make_report_message
 
 
@@ -27,6 +24,6 @@ class ReportTestCase(unittest.TestCase):
         Test reply report message
         '''
         self.assertEqual(
-            (json.loads(str(self.result_message))),
+            json.loads(str(self.result_message)),
             self.expected_message
         )

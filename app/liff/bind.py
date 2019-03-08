@@ -3,6 +3,7 @@ LINE account with Goodlinker AWS user
 
 Created at 2018/12/26 by Eric
 '''
+import json
 import requests
 from flask import Flask
 from linebot.models import ButtonsTemplate, TemplateSendMessage, URIAction
@@ -28,21 +29,23 @@ def query_user_data(email, phone, line_user_id):
         return messages
 
     # Query sensor.live end users list
-    headers = {
-        'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-        'Authorization': app.config['SENSOR_LIVE_TOKEN']
-    }
     end_users_list = requests.get(
         ''.join(
             [
-                'https://api.sensor.live/api/projects/',
-                app.config['SENSOR_LIVE_PROJECT_ID'],
-                '/end_users/list'
+                app.config['SENSOR_LIVE_API_URL'],
+                'projects/{project}/end_users/list'
             ]
         ),
-        headers=headers
+        params={
+            'porject': app.config['SENSOR_LIVE_PROJECT_ID']
+        },
+        headers={
+            'Account': app.config['SENSOR_LIVE_ACCOUNT'],
+            'Authorization': app.config['SENSOR_LIVE_TOKEN']
+        }
     )
-    end_users_list = end_users_list.json()
+    end_users_list = json.loads(end_users_list.text)
+
     for end_user in end_users_list['data']:
         if 'phone' in end_user:
             if end_user['phone'] == phone:
@@ -89,13 +92,13 @@ def check_line_user_id_exist(line_user_id):
 # Bind user to RDS table: USERS
 def bind_line_user_id(username, line_user_id):
     user = User(
-        line_user_id='line_user_id',
-        aws_user_name='aws_user_name'
+        line_user_id=line_user_id,
+        aws_user_name=username
     )
 
     db.session.add(user)
     try:
         db.session.commit()
+        User.link_rm_to_user(user)
     except:
         pass
-    User.link_rm_to_user(user)

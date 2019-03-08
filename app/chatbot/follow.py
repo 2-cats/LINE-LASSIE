@@ -1,8 +1,14 @@
 import datetime
+
+from flask import Flask
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, TextComponent)
 
+from .. import db
 from ..models import User
+
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
 
 def follow_message():
@@ -41,11 +47,7 @@ def unfollow(line_user_id):
         db.session.add(user)
 
         try:
-            User.link_rm_to_guest(user)
-        except:
-            pass
-
-        try:
             db.session.commit()
+            User.link_rm_to_guest(user)
         except:
             pass

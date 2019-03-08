@@ -3,7 +3,6 @@ import json
 
 import requests
 from flask import Flask
-from linebot import LineBotApi
 from linebot.models import (BoxComponent, BubbleContainer, CarouselContainer,
                             FlexSendMessage, TextComponent, TextSendMessage)
 
@@ -12,23 +11,16 @@ from ..models import User
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
-
 def device_list_message(line_user_id):
     # Get device data
     devices_data = get_device_list_data(line_user_id)
     # If user have device data
     if devices_data:
-        line_bot_api.push_message(
-            line_user_id,
-            have_device_message(devices_data)
-        )
+        message = have_device_message(devices_data)
     # If user not have device data
     else:
-        line_bot_api.push_message(
-            line_user_id,
-            no_device_message()
-        )
+        message = no_device_message()
+    return message
 
 def have_device_message(devices_data):
     carousel_template_columns = []
@@ -77,12 +69,13 @@ def get_device_list_data(line_user_id):
     # Query enduser resources
     things_response = requests.get(
         ''.join([
-            'https://api.sensor.live/api/projects/',
-            app.config['SENSOR_LIVE_PROJECT_ID'],
-            '/end_users/',
-            user.aws_user_name,
-            '/resources?target=things'
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/{project}/end_users/{end_user_username}/resources?target=things',
         ]),
+        params={
+            'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
+            'end_user_username': user.aws_user_name
+        },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
             'Authorization': app.config['SENSOR_LIVE_TOKEN']
@@ -94,11 +87,13 @@ def get_device_list_data(line_user_id):
         for thing in things_response_json['data']:
             thing_response = requests.get(
                 ''.join([
-                    'https://api.sensor.live/api/projects/',
-                    app.config['SENSOR_LIVE_PROJECT_ID'],
-                    '/things/',
-                    thing['name']
+                    app.config['SENSOR_LIVE_API_URL'],
+                    'projects/{porject}/things/{thing}'
                 ]),
+                params={
+                    'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
+                    'thing': thing['name']
+                },
                 headers={
                     'Account': app.config['SENSOR_LIVE_ACCOUNT'],
                     'Authorization': app.config['SENSOR_LIVE_TOKEN']

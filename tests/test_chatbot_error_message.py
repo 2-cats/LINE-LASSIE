@@ -1,9 +1,6 @@
 import json
 import unittest
 
-import responses
-from linebot import LineBotApi
-
 from app.chatbot.error_message import (alert_no_action_message,
                                        alert_to_bind_message)
 
@@ -74,7 +71,7 @@ class NoActionMessageTestCase(unittest.TestCase):
         Test reply message
         '''
         self.assertEqual(
-            (json.loads(str(self.result_message))),
+            json.loads(str(self.result_message)),
             self.expected_message
         )
 
@@ -136,6 +133,6 @@ class NoBindMessageTestCase(unittest.TestCase):
         Test reply to bind message
         '''
         self.assertEqual(
-            (json.loads(str(self.result_message))),
+            json.loads(str(self.result_message)),
             self.expected_message
         )

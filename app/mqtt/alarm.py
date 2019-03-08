@@ -1,6 +1,5 @@
 import urllib
 
-import pymysql
 from flask import Flask
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, IconComponent, ImageComponent,
@@ -16,25 +15,58 @@ def lassie_alarm_message(mqtt_message):
     rule = ''
     if mqtt_message['t'] == 'counter':
         unit = ' (次)'
-        rule = '設定 : ' + str(mqtt_message['r']) + ' 次'
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['r']),
+            ' 次'
+        ])
     elif (mqtt_message['t'] == 'lamp') or (mqtt_message['t'] == 'state') or (mqtt_message['t'] == 'color') or (mqtt_message['t'] == 'detector'):
         unit = ' (偵測值)'
-        rule = '設定 : ' + str(mqtt_message['r'])
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['r'])
+        ])
     elif mqtt_message['t'] == 'current':
         unit = ' (mAh)'
-        rule = '設定 : ' + str(mqtt_message['r']) + ' mAh'
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['r']),
+            ' mAh'
+        ])
     elif mqtt_message['t'] == 'temperature':
         unit = ' (℃)'
-        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l']) + ' ℃'
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['ra']['h']),
+            " ～ ",
+            str(mqtt_message['ra']['l']),
+            ' ℃'
+        ])
     elif mqtt_message['t'] == 'humidity':
         unit = ' (%)'
-        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l']) + ' %'
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['ra']['h']),
+            " ～ ",
+            str(mqtt_message['ra']['l']),
+            ' %'
+        ])
     elif mqtt_message['t'] == 'timer':
         unit = ' (秒)'
-        rule = '設定 : ' + str(mqtt_message['r']) + ' 秒'
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['r']),
+            ' 秒'
+        ])
+
     elif mqtt_message['t'] == 'ocr':
         unit = '(偵測值)'
-        rule = '設定 : ' + str(mqtt_message['ra']['h']) + " ～ " + str(mqtt_message['ra']['l'])
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['ra']['h']),
+            " ～ ",
+            str(mqtt_message['ra']['l'])
+        ])
 
     message_list = []
 
