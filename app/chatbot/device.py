@@ -77,7 +77,8 @@ def get_device_list_data(line_user_id):
     # Query enduser resources
     things_response = requests.get(
         ''.join([
-            'https://api.sensor.live/api/projects/',
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/end_users/',
             user.aws_user_name,
@@ -94,7 +95,8 @@ def get_device_list_data(line_user_id):
         for thing in things_response_json['data']:
             thing_response = requests.get(
                 ''.join([
-                    'https://api.sensor.live/api/projects/',
+                    app.config['SENSOR_LIVE_API_URL'],
+                    'projects/',
                     app.config['SENSOR_LIVE_PROJECT_ID'],
                     '/things/',
                     thing['name']

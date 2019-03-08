@@ -2,10 +2,16 @@ import json
 import unittest
 
 import responses
+from flask import Flask
 from linebot import LineBotApi
 
+from app import create_app, db
 from app.chatbot.follow import follow_message, unfollow
+from app.models import User
+from config import config
 
+app = Flask(__name__)
+app.config.from_object(config['testing'])
 
 class FollowTestCase(unittest.TestCase):
     '''
@@ -15,8 +21,21 @@ class FollowTestCase(unittest.TestCase):
         '''
         Set up test
         '''
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+        # Create fake User data
+        user = User(
+            line_user_id='line_user_id',
+            aws_user_name='aws_user_name'
+        )
+
+        db.session.add_all([user])
+        db.session.commit()
+
         # test data
-        self.result_message = follow_message()
         self.expected_message = {
             "type":"flex",
             "altText":"歡迎您的加入",
@@ -44,13 +63,28 @@ class FollowTestCase(unittest.TestCase):
                 }
             }
         }
-        
+
+    def tearDown(self):
+        db.session.remove()  # Remove database session
+        db.drop_all()  # Drop database
+        self.app_context.pop()
 
     def test_follow_message(self):
         '''
         Test reply follow event message
         '''
         self.assertEqual(
-            (json.loads(str(self.result_message))),
+            (json.loads(str(follow_message()))),
             self.expected_message
+        )
+
+    def test_unfollow(self):
+        unfollow('line_user_id')
+        user = User.query.filter_by(
+            line_user_id='line_user_id',
+            deleted_at=None
+        ).first()
+        self.assertEqual(
+            user,
+            None
         )

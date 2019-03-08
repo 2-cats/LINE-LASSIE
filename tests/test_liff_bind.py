@@ -87,3 +87,14 @@ class BindTestCase(unittest.TestCase):
             ['找不到使用者']
         )
         return 0
+
+    def test_bind_line_user_id(self):
+        bind_line_user_id('eric_in_aws', 'eric_line')
+        user = User.query.filter_by(
+            line_user_id='eric_line',
+            deleted_at=None
+        ).first()
+        self.assertEquals(
+            user.aws_user_name,
+            'eric_in_aws'
+        )

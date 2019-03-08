@@ -35,7 +35,8 @@ def query_user_data(email, phone, line_user_id):
     end_users_list = requests.get(
         ''.join(
             [
-                'https://api.sensor.live/api/projects/',
+                app.config['SENSOR_LIVE_API_URL'],
+                'projects/',
                 app.config['SENSOR_LIVE_PROJECT_ID'],
                 '/end_users/list'
             ]
@@ -89,13 +90,13 @@ def check_line_user_id_exist(line_user_id):
 # Bind user to RDS table: USERS
 def bind_line_user_id(username, line_user_id):
     user = User(
-        line_user_id='line_user_id',
-        aws_user_name='aws_user_name'
+        line_user_id=line_user_id,
+        aws_user_name=username
     )
 
     db.session.add(user)
     try:
         db.session.commit()
+        User.link_rm_to_user(user)
     except:
         pass
-    User.link_rm_to_user(user)

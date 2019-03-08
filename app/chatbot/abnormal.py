@@ -22,7 +22,8 @@ def summary(line_user_id, thing_id):
     # Get things shadow
     things_shadow = requests.get(
         ''.join([
-            'https://api.sensor.live/api/projects/',
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/things/',
             thing_id,
@@ -300,7 +301,8 @@ def have_device_message_for_alarmlist(devices_data):
     for device_data in devices_data:
         things_shadow = requests.get(
             ''.join([
-                'https://api.sensor.live/api/projects/',
+                app.config['SENSOR_LIVE_API_URL'],
+                'projects/',
                 app.config['SENSOR_LIVE_PROJECT_ID'],
                 '/things/',
                 device_data['name'],
@@ -363,7 +365,8 @@ def get_device_list_data_for_alarmlist(line_user_id):
 
     things_response = requests.get(
         ''.join([
-            'https://api.sensor.live/api/projects/',
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/end_users/',
             user.aws_user_name,
@@ -381,7 +384,8 @@ def get_device_list_data_for_alarmlist(line_user_id):
         for thing in things_response_json['data']:
             thing_response = requests.get(
                 ''.join([
-                    'https://api.sensor.live/api/projects/',
+                    app.config['SENSOR_LIVE_API_URL'],
+                    'projects/',
                     app.config['SENSOR_LIVE_PROJECT_ID'],
                     '/things/',
                     thing['name']
