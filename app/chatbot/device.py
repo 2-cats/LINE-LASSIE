@@ -65,16 +65,20 @@ def get_device_list_data(line_user_id):
         line_user_id=line_user_id,
         deleted_at=None
     ).first()
-
+    url = ''.join([
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/',
+            app.config['SENSOR_LIVE_PROJECT_ID'],
+            '/end_users/',
+            user.aws_user_name,
+            '/resources'
+        ])
+    print (url)
     # Query enduser resources
     things_response = requests.get(
-        ''.join([
-            app.config['SENSOR_LIVE_API_URL'],
-            'projects/{project}/end_users/{end_user_username}/resources?target=things',
-        ]),
+        url,
         params={
-            'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
-            'end_user_username': user.aws_user_name
+            'target': 'things'
         },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
@@ -88,12 +92,11 @@ def get_device_list_data(line_user_id):
             thing_response = requests.get(
                 ''.join([
                     app.config['SENSOR_LIVE_API_URL'],
-                    'projects/{porject}/things/{thing}'
+                    'projects/',
+                    app.config['SENSOR_LIVE_PROJECT_ID'],
+                    '/things/',
+                    thing['name']
                 ]),
-                params={
-                    'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
-                    'thing': thing['name']
-                },
                 headers={
                     'Account': app.config['SENSOR_LIVE_ACCOUNT'],
                     'Authorization': app.config['SENSOR_LIVE_TOKEN']
