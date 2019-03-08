@@ -270,12 +270,12 @@ def get_shadow(thing_id):
     things_shadow = requests.get(
         ''.join([
             app.config['SENSOR_LIVE_API_URL'],
-            'projects/{project}/things/{thing}/shadow'
+            'projects/',
+            app.config['SENSOR_LIVE_PROJECT_ID'],
+            '/things/',
+            thing_id,
+            '/shadow'
         ]),
-        params={
-            'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
-            'thing': thing_id
-        },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
             'Authorization': app.config['SENSOR_LIVE_TOKEN']
@@ -302,12 +302,12 @@ def have_alarm_message(devices_data):
         things_shadow = requests.get(
             ''.join([
                 app.config['SENSOR_LIVE_API_URL'],
-                'projects/{project}/things/{thing}/shadow'
+                'projects/',
+                app.config['SENSOR_LIVE_PROJECT_ID'],
+                '/things/',
+                device_data['name'],
+                '/shadow'
             ]),
-            params={
-                'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
-                'thing':  device_data['name']
-            },
             headers={
                 'Account': app.config['SENSOR_LIVE_ACCOUNT'],
                 'Authorization': app.config['SENSOR_LIVE_TOKEN']
@@ -371,15 +371,17 @@ def get_alarm_list_data(line_user_id):
         line_user_id=line_user_id,
         deleted_at=None
     ).first()
-
     things_response = requests.get(
         ''.join([
             app.config['SENSOR_LIVE_API_URL'],
-            'projects/{project}/end_users/{end_user_username}/resources?target=things',
+            'projects/',
+            app.config['SENSOR_LIVE_PROJECT_ID'],
+            '/end_users/',
+            user.aws_user_name,
+            '/resources'
         ]),
         params={
-            'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
-            'end_user_username': user.aws_user_name
+            'target': 'things'
         },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
@@ -394,12 +396,11 @@ def get_alarm_list_data(line_user_id):
             thing_response = requests.get(
                 ''.join([
                     app.config['SENSOR_LIVE_API_URL'],
-                    'projects/{porject}/things/{thing}'
+                    'projects/',
+                    app.config['SENSOR_LIVE_PROJECT_ID'],
+                    '/things/',
+                    thing['name']
                 ]),
-                params={
-                    'porject': app.config['SENSOR_LIVE_PROJECT_ID'],
-                    'thing': thing['name']
-                },
                 headers={
                     'Account': app.config['SENSOR_LIVE_ACCOUNT'],
                     'Authorization': app.config['SENSOR_LIVE_TOKEN']

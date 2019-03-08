@@ -33,19 +33,17 @@ def query_user_data(email, phone, line_user_id):
         ''.join(
             [
                 app.config['SENSOR_LIVE_API_URL'],
-                'projects/{project}/end_users/list'
+                'projects/',
+                app.config['SENSOR_LIVE_PROJECT_ID'],
+                '/end_users/list'
             ]
         ),
-        params={
-            'porject': app.config['SENSOR_LIVE_PROJECT_ID']
-        },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
             'Authorization': app.config['SENSOR_LIVE_TOKEN']
         }
     )
     end_users_list = json.loads(end_users_list.text)
-
     for end_user in end_users_list['data']:
         if 'phone' in end_user:
             if end_user['phone'] == phone:
