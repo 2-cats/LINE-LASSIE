@@ -127,9 +127,6 @@ class GetDeviceDataTestCase(unittest.TestCase):
         db.session.add_all([user])
         db.session.commit()
 
-        app.config['SENSOR_LIVE_PROJECT_ID']
-
-
         self.result_message = get_device_list_data(user.line_user_id)
         self.expected_message = [
             {
