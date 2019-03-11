@@ -6,8 +6,26 @@ from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             ImageSendMessage, SeparatorComponent,
                             TextComponent, URIAction)
 
+from ..models import User
+
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
+
+
+def make_report(mqtt, line_user_id):
+    user = User.query.filter_by(
+        line_user_id=line_user_id,
+        deleted_at=None
+    ).first()
+    topic = ''.join(
+        [
+            '/lassie/',
+            user.aws_user_name,
+            '/getTodayReport'
+        ]
+    )
+    mqtt.publish(topic, '')
+    return 0
 
 def lassie_report_message(mqtt_message):
     thing_name = mqtt_message['x']

@@ -1,13 +1,13 @@
 import json
 
-from flask import Flask
+from flask import Flask, Response, request
 from flask_mqtt import Mqtt
 from linebot import LineBotApi
 
 from . import mqtt
 from .. import db
 from .alarm import lassie_alarm_message
-from .report import lassie_report_message
+from .report import lassie_report_message, make_report
 from .user import get_push_id, username_to_line_user_id
 
 app = Flask(__name__, instance_relative_config=True)
@@ -21,16 +21,16 @@ app.config['MQTT_BROKER_URL'] = app.config["MQTT_HOSTNAME"]
 app.config['MQTT_BROKER_PORT'] = app.config["MQTT_PORT"]
 app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
 app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
-mqtt = Mqtt(app)
+MQTT = Mqtt(app)
 
-@mqtt.on_connect()
+@MQTT.on_connect()
 def handle_connect(client, userdata, flags, rc):
-    mqtt.subscribe("/line/gl1/lassie/alarm")
-    mqtt.subscribe("/lassie/getTodayReport")
+    MQTT.subscribe("/line/gl1/lassie/alarm")
+    MQTT.subscribe("/lassie/getTodayReport")
 
 
 # Handle MQTT message
-@mqtt.on_message()
+@MQTT.on_message()
 def handle_mqtt_message(client, userdata, message):
     topic = message.topic
     if topic == '/line/gl1/lassie/alarm':
@@ -45,3 +45,12 @@ def handle_mqtt_message(client, userdata, message):
         line_user_id = username_to_line_user_id(payload['u'])
         line_bot_api.push_message(line_user_id, message)
         return 0
+
+@mqtt.route("/mqtt/report/send/today", methods=['GET'])
+def send_report_message():
+    line_user_id = request.args.get('line_user_id')
+    make_report(MQTT, line_user_id)
+    return Response(
+        '0k',
+        status=200
+    )
