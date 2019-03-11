@@ -2,6 +2,8 @@ from flask import Flask
 from flask_mqtt import Mqtt
 from linebot.models import TextSendMessage
 
+from ..models import User
+
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
@@ -14,8 +16,22 @@ mqtt = Mqtt(app)
 
 def make_report_message(line_user_id):
     make_report(line_user_id)
-    return TextSendMessage(text='好的，我正在為您準備報表，請稍候！')
+    message = TextSendMessage(
+        text='好的，我正在為您準備報表，請稍候！'
+    )
+    return message
 
 def make_report(line_user_id):
-    mqtt.publish('mytopic', 'any message you want to pubish')
+    user = User.query.filter_by(
+        line_user_id=line_user_id,
+        deleted_at=None
+    ).first()
+    topic = ''.join(
+        [
+            '/lassie/',
+            user.aws_user_name,
+            '/getTodayReport'
+        ]
+    )
+    mqtt.publish(topic, None)
     return 0
