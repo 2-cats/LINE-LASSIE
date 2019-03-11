@@ -17,25 +17,31 @@ handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
 @liff.route("/line/bind_email", methods=['GET'])
 def line_bind_email_view():
-    return render_template('line/bind_email.html')
+    return render_template('line/bind/email.html')
 
 @liff.route("/line/bind_phone", methods=['POST'])
 def line_bind_phone_view():
     email = request.values['email']
-    return render_template('line/bind_phone.html', email = email)
+    return render_template(
+        'line/bind/phone.html',
+        email=email
+    )
 
 @liff.route("/line/bind_check", methods=['POST'])
 def line_bind_view():
     email = request.values['email']
     phone = request.values['phone']
     line_user_id = request.values['line_user_id']
-    check_result = bind_user(email, phone, line_user_id)
-    return render_template('line/bind_check.html', check_result = check_result)
+    messages = bind_user(email, phone, line_user_id)
+    return render_template(
+        'line/bind/check.html',
+        messages=messages
+    )
 
 @liff.route("/line/daily_report", methods=['GET'])
 def line_daily_report():
     data=request.args.get('data')
     return render_template(
-        'line/daily_report.html',
+        'line/report/daily.html',
         davice_data=data
     )

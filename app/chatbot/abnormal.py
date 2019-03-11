@@ -3,44 +3,23 @@ import json
 
 import requests
 from flask import Flask
-from linebot import LineBotApi
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             CarouselContainer, FlexSendMessage,
                             ImageSendMessage, PostbackAction,
                             SeparatorComponent, TextComponent, TextSendMessage)
-
-import config
 
 from ..models import User
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-line_bot_api = LineBotApi(app.config['LINE_CHANNEL_ACCESS_TOKEN'])
-
-
-def summary(line_user_id,postback_data):
-    user = User.query.filter_by(
-        line_user_id=line_user_id
-    ).first()
-    things_shadow = requests.get(
-        ''.join([
-            'https://api.sensor.live/api/projects/',
-            app.config['SENSOR_LIVE_PROJECT_ID'],
-            '/things/',
-            postback_data[1],
-            '/shadow'
-        ]),
-        headers={
-            'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-            'Authorization': app.config['SENSOR_LIVE_TOKEN']
-        }
-    )
-    things_shadow_json = json.loads(things_shadow.text)
+def summary(thing_id):
+    things_shadow_json = get_shadow(thing_id)
     bubble_template_columns = []
+    message_list = []
     for thing_name in things_shadow_json['state']['reported']['errs']:
-        if thing_name.startswith("cam") != 1:
-            list = BoxComponent(
+        if not thing_name.startswith("cam"):
+            message = BoxComponent(
                 layout='horizontal',
                 flex=1,
                 spacing='sm',
@@ -61,7 +40,7 @@ def summary(line_user_id,postback_data):
 
                 ]
             )
-            bubble_template_columns.append(list)
+            bubble_template_columns.append(message)
         else:
             for surv in things_shadow_json['state']['reported'][thing_name]['errs']:
                 bubble_for_cam = BubbleContainer(
@@ -70,7 +49,7 @@ def summary(line_user_id,postback_data):
                         layout='vertical',
                         contents=[
                             TextComponent(
-                                text='Camera Report',
+                                text='圖片報告',
                                 wrap=True,
                                 color='#1DB446',
                                 size='xxl',
@@ -98,13 +77,13 @@ def summary(line_user_id,postback_data):
                                 margin='md',
                                 contents=[
                                     TextComponent(
-                                        text='Sensor',
+                                        text='感測器',
                                         weight='bold',
                                         color='#030303',
                                         size='lg'
                                     ),
                                     TextComponent(
-                                        text='Value',
+                                        text='數值',
                                         weight='bold',
                                         color='#030303',
                                         margin='md',
@@ -151,7 +130,7 @@ def summary(line_user_id,postback_data):
                                 margin='md',
                                 contents=[
                                     TextComponent(
-                                        text='Date',
+                                        text='日期',
                                         weight='regular',
                                         align='start',
                                         color='#aaaaaa',
@@ -167,7 +146,7 @@ def summary(line_user_id,postback_data):
                                         align='end',
                                         size='xs',
                                         gravity="top",
-                                        flex = 5
+                                        flex=5
                                     ),
 
                                 ]
@@ -177,16 +156,24 @@ def summary(line_user_id,postback_data):
                     ),
 
                 )
-                line_bot_api.push_message(line_user_id, FlexSendMessage(alt_text='異常總表', contents=bubble_for_cam))
-                line_bot_api.push_message(line_user_id, ImageSendMessage(original_content_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url']),
-                                                                         preview_image_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url'])))
+                message = FlexSendMessage(
+                    alt_text='異常總表',
+                    contents=bubble_for_cam
+                )
+                message_list.append(message)
+                message = ImageSendMessage(
+                    original_content_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url']),
+                    preview_image_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url'])
+                )
+                message_list.append(message)
+    
     bubble = BubbleContainer(
         direction='ltr',
         header=BoxComponent(
             layout='vertical',
             contents=[
                TextComponent(
-                    text='Report',
+                    text='報告',
                     wrap=True,
                     color='#1DB446',
                     size='xxl',
@@ -194,7 +181,7 @@ def summary(line_user_id,postback_data):
                     margin='md',
                 ),
                TextComponent(
-                    text=postback_data[1],
+                    text=thing_id,
                     size='xs',
                     color='#aaaaaa',
                 ),
@@ -214,13 +201,13 @@ def summary(line_user_id,postback_data):
                     margin='md',
                     contents=[
                 TextComponent(
-                    text='Sensor',
+                    text='感測器',
                     weight='bold',
                     color='#030303',
                     size='lg'
                     ),
                 TextComponent(
-                    text='Value',
+                    text='數值',
                     weight='bold',
                     color='#030303',
                     margin='md',
@@ -245,7 +232,7 @@ def summary(line_user_id,postback_data):
                     margin='md',
                     contents=[
                         TextComponent(
-                            text='Date',
+                            text='日期',
                             weight='regular',
                             align='start',
                             color='#aaaaaa',
@@ -271,25 +258,51 @@ def summary(line_user_id,postback_data):
         ),
 
     )
-    message = FlexSendMessage(alt_text='異常總表', contents=bubble)
-    return message
+    message = FlexSendMessage(
+        alt_text='異常總表',
+        contents=bubble
+    )
+    message_list.append(message)
+    return message_list
 
+def get_shadow(thing_id):
+    # Get things shadow
+    things_shadow = requests.get(
+        ''.join([
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/',
+            app.config['SENSOR_LIVE_PROJECT_ID'],
+            '/things/',
+            thing_id,
+            '/shadow'
+        ]),
+        headers={
+            'Account': app.config['SENSOR_LIVE_ACCOUNT'],
+            'Authorization': app.config['SENSOR_LIVE_TOKEN']
+        }
+    )
+    things_shadow_json = json.loads(things_shadow.text)
+    return things_shadow_json
 
-def device_list_message_for_alarmlist(line_user_id):
-    devices_data = get_device_list_data_for_alarmlist(line_user_id)
+def alarm_list_message(line_user_id):
+    devices_data = get_alarm_list_data(line_user_id)
+    message_list = []
+    print (devices_data)
     if devices_data:
-        line_bot_api.push_message(line_user_id, TextSendMessage(text="搜尋異常萊西中..."))
-        line_bot_api.push_message(line_user_id,have_device_message_for_alarmlist(line_user_id, devices_data))
+        message = have_alarm_message(devices_data)
+        message_list.append(message)
     else:
-        line_bot_api.push_message(
-            line_user_id, no_device_message_for_alarmlist(line_user_id)
-        )
-def have_device_message_for_alarmlist(line_user_id, devices_data):
+        message = no_alarm_message()
+        message_list.append(message)
+    return message_list
+
+def have_alarm_message(devices_data):
     carousel_template_columns = []
     for device_data in devices_data:
         things_shadow = requests.get(
             ''.join([
-                'https://api.sensor.live/api/projects/',
+                app.config['SENSOR_LIVE_API_URL'],
+                'projects/',
                 app.config['SENSOR_LIVE_PROJECT_ID'],
                 '/things/',
                 device_data['name'],
@@ -301,9 +314,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
             }
         )
         things_shadow_json = json.loads(things_shadow.text)
-        if things_shadow_json is None:
-            pass
-        elif things_shadow_json !={}:
+        if things_shadow_json is not None:
             if things_shadow_json['state']['reported']['errs'] !=[]:
                 bubble_template = BubbleContainer(
                     body=BoxComponent(
@@ -316,7 +327,16 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                                 size='lg',
                             ),
                             ButtonComponent(
-                                action=PostbackAction(label="異常總表", data=','.join(['abnormal',device_data['name']]),display_text='查詢異常總覽...'),
+                                action=PostbackAction(
+                                    label="異常總表",
+                                    data=','.join(
+                                        [
+                                            'abnormal',
+                                            device_data['name']
+                                        ]
+                                    ),
+                                    display_text='查詢異常總覽...'
+                                ),
                                 flex=100,
                                 size='xl',
                                 weight='bold',
@@ -330,7 +350,7 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
                 carousel_template_columns.append(bubble_template)
 
     if carousel_template_columns == []:
-        message=TextSendMessage(text='未偵測到異常萊西！！')
+        message = TextSendMessage(text='未偵測到異常萊西！！')
     else:
         message = FlexSendMessage(
             alt_text='異常設備清單',
@@ -340,36 +360,43 @@ def have_device_message_for_alarmlist(line_user_id, devices_data):
         )
     return message
 
-def no_device_message_for_alarmlist(line_user_id):
-    return TextSendMessage(
+def no_alarm_message():
+    message = TextSendMessage(
         text='搜尋不到任何萊西！'
     )
-
     return message
-def get_device_list_data_for_alarmlist(line_user_id):
+
+def get_alarm_list_data(line_user_id):
     user = User.query.filter_by(
-        line_user_id=line_user_id
+        line_user_id=line_user_id,
+        deleted_at=None
     ).first()
     things_response = requests.get(
         ''.join([
-            'https://api.sensor.live/api/projects/',
+            app.config['SENSOR_LIVE_API_URL'],
+            'projects/',
             app.config['SENSOR_LIVE_PROJECT_ID'],
             '/end_users/',
             user.aws_user_name,
-            '/resources?target=things'
+            '/resources'
         ]),
+        params={
+            'target': 'things'
+        },
         headers={
             'Account': app.config['SENSOR_LIVE_ACCOUNT'],
             'Authorization': app.config['SENSOR_LIVE_TOKEN']
         }
     )
+
     if things_response.status_code == 200:
         thing_data = []
         things_response_json = json.loads(things_response.text)
         for thing in things_response_json['data']:
             thing_response = requests.get(
                 ''.join([
-                    'https://api.sensor.live/api/projects/',
+                    app.config['SENSOR_LIVE_API_URL'],
+                    'projects/',
                     app.config['SENSOR_LIVE_PROJECT_ID'],
                     '/things/',
                     thing['name']

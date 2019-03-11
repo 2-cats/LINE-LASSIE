@@ -1,7 +1,7 @@
 import json
 
 from flask import Flask, abort, current_app, render_template, request
-from flask_mqtt import Mqtt
+
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
@@ -11,13 +11,13 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
 
 from . import chatbot
 from .. import db
-from .abnormal import device_list_message_for_alarmlist, summary
+from .abnormal import alarm_list_message, summary
 from .bind import bind_member, check_bind
 from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
-from .report import make_report
+from .report import make_report_message
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -26,12 +26,6 @@ app.config.from_pyfile('config.py')
 line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
 
-# MQTT
-app.config['MQTT_BROKER_URL'] = app.config["MQTT_HOSTNAME"]
-app.config['MQTT_BROKER_PORT'] = app.config["MQTT_PORT"]
-app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
-app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
-mqtt = Mqtt(app)
 
 @chatbot.route("/callback", methods=['POST'])
 def callback():
@@ -55,7 +49,7 @@ def handle_follow(event):
     '''
     Handle follow event
     '''
-    message = follow_message(event.source.user_id)
+    message = follow_message()
     line_bot_api.reply_message(event.reply_token, message)
     return 0
 
@@ -74,7 +68,9 @@ def handle_message(event):
     # Get common LINE user information
     line_user_id = event.source.user_id
     message_text = event.message.text
-    if event.source.type == 'user':
+    source_type = event.source.type
+
+    if source_type == 'user':
         if message_text == "get_me_line_user_id":
             message = TextSendMessage(text=str(line_user_id))
             line_bot_api.reply_message(event.reply_token, message)
@@ -85,7 +81,8 @@ def handle_message(event):
             if message_text == "異常總覽":
                 message = TextSendMessage(text='稍等一下！我正在搜尋您的萊西...')
                 line_bot_api.reply_message(event.reply_token, message)
-                device_list_message_for_alarmlist(line_user_id)
+                message = alarm_list_message(line_user_id)
+                line_bot_api.push_message(line_user_id, message)
                 return 0
             if message_text == "聯絡我們":
                 message = contact_us(line_user_id)
@@ -94,24 +91,25 @@ def handle_message(event):
             if message_text == "設備清單":
                 message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
                 line_bot_api.reply_message(event.reply_token, message)
-                device_list_message(line_user_id)
+                message = device_list_message(line_user_id)
+                line_bot_api.push_message(line_user_id, message)
                 return 0
             if message_text == "今日報表":
-                message = make_report(mqtt, line_user_id)
+                message = make_report_message(line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-            message = alert_no_action_message(line_user_id)
+            message = alert_no_action_message()
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-        message = alert_to_bind_message(line_user_id)
+        message = alert_to_bind_message()
         line_bot_api.reply_message(event.reply_token, message)
         return 0
-    elif event.source.type == 'room':
+    elif source_type == 'room':
         if message_text == "綁定萊西":
             message = bind_member(line_user_id, event.source.room_id, 'room')
             line_bot_api.reply_message(event.reply_token, message)
             return 0
-    elif event.source.type == 'group':
+    elif source_type == 'group':
         if message_text == "綁定萊西":
             message = bind_member(line_user_id, event.source.group_id, 'group')
             line_bot_api.reply_message(event.reply_token, message)
@@ -123,9 +121,10 @@ def handle_postback(event):
     line_user_id = event.source.user_id
     # data="action, var1, var2, ... ,varN"
     # Convet to postback_data: [action, var1, var2, ... ,varN]
-    postback_data = event.postback.data.split(",") 
+    postback_data = event.postback.data.split(",")
     if postback_data[0] == "abnormal":
-        message = summary(line_user_id,postback_data)
+        thing_id = postback_data[1]
+        message = summary(thing_id)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
@@ -136,30 +135,38 @@ def handle_loaction_message(event):
     Handle location message Event.
     """
     line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        message = alert_no_action_message()
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle image message event
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image_message(event):
-    line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        line_user_id = event.source.user_id
+        message = alert_no_action_message()
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle audio message event
 @handler.add(MessageEvent, message=AudioMessage)
 def handle_audio_message(event):
-    line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        line_user_id = event.source.user_id
+        message = alert_no_action_message()
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
 
 # Handle sticker message event
 @handler.add(MessageEvent, message=StickerMessage)
 def handle_sticker_message(event):
-    line_user_id = event.source.user_id
-    message = alert_no_action_message(line_user_id)
-    line_bot_api.reply_message(event.reply_token, message)
-    return 0
+    source_type = event.source.type
+    if source_type == 'user':
+        line_user_id = event.source.user_id
+        message = alert_no_action_message()
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
