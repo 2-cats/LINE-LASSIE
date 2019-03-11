@@ -16,41 +16,4 @@ app.config.from_pyfile('config.py')
 # LINE ACCESS
 line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 
-# MQTT
-app.config['MQTT_BROKER_URL'] = app.config["MQTT_HOSTNAME"]
-app.config['MQTT_BROKER_PORT'] = app.config["MQTT_PORT"]
-app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
-app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
-MQTT = Mqtt(app)
 
-@MQTT.on_connect()
-def handle_connect(client, userdata, flags, rc):
-    MQTT.subscribe("/line/gl1/lassie/alarm")
-    MQTT.subscribe("/lassie/getTodayReport")
-
-
-# Handle MQTT message
-@MQTT.on_message()
-def handle_mqtt_message(client, userdata, message):
-    topic = message.topic
-    if topic == '/line/gl1/lassie/alarm':
-        payload = json.loads(message.payload.decode())
-        message = lassie_alarm_message(payload)
-        line_user_id = get_push_id(payload['u'])
-        line_bot_api.push_message(line_user_id, message)
-        return 0
-    elif topic == '/lassie/getTodayReport':
-        payload = json.loads(message.payload.decode())
-        message = lassie_report_message(payload)
-        line_user_id = username_to_line_user_id(payload['u'])
-        line_bot_api.push_message(line_user_id, message)
-        return 0
-
-@mqtt.route("/mqtt/report/send/today", methods=['GET'])
-def send_report_message():
-    line_user_id = request.args.get('line_user_id')
-    make_report(MQTT, line_user_id)
-    return Response(
-        '0k',
-        status=200
-    )

@@ -1,7 +1,7 @@
 import json
 
 from flask import Flask, abort, current_app, render_template, request
-
+from flask_mqtt import Mqtt
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
@@ -12,12 +12,13 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
 from . import chatbot
 from .. import db
 from .abnormal import alarm_list_message, summary
+from .alarm import lassie_alarm_message
 from .bind import bind_member, check_bind
 from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
-from .report import make_report_message
+from .report import lassie_report_message, make_report_message
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -25,6 +26,13 @@ app.config.from_pyfile('config.py')
 # LINE ACCESS
 line_bot_api = LineBotApi(app.config["LINE_CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(app.config["LINE_CHANNEL_SECRET"])
+
+# MQTT
+app.config['MQTT_BROKER_URL'] = app.config["MQTT_HOSTNAME"]
+app.config['MQTT_BROKER_PORT'] = app.config["MQTT_PORT"]
+app.config['MQTT_USERNAME'] = app.config["MQTT_USERNAME"]
+app.config['MQTT_PASSWORD'] = app.config["MQTT_PASSWORD"]
+MQTT = Mqtt(app)
 
 
 @chatbot.route("/callback", methods=['POST'])
@@ -95,7 +103,7 @@ def handle_message(event):
                 line_bot_api.push_message(line_user_id, message)
                 return 0
             if message_text == "今日報表":
-                message = make_report_message(line_user_id)
+                message = make_report_message(MQTT, line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
             message = alert_no_action_message()
@@ -169,4 +177,29 @@ def handle_sticker_message(event):
         line_user_id = event.source.user_id
         message = alert_no_action_message()
         line_bot_api.reply_message(event.reply_token, message)
+        return 0
+
+
+
+@MQTT.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    MQTT.subscribe("/line/gl1/lassie/alarm")
+    MQTT.subscribe("/lassie/getTodayReport")
+
+
+# Handle MQTT message
+@MQTT.on_message()
+def handle_mqtt_message(client, userdata, message):
+    topic = message.topic
+    if topic == '/line/gl1/lassie/alarm':
+        payload = json.loads(message.payload.decode())
+        message = lassie_alarm_message(payload)
+        line_user_id = get_push_id(payload['u'])
+        line_bot_api.push_message(line_user_id, message)
+        return 0
+    elif topic == '/lassie/getTodayReport':
+        payload = json.loads(message.payload.decode())
+        message = lassie_report_message(payload)
+        line_user_id = username_to_line_user_id(payload['u'])
+        line_bot_api.push_message(line_user_id, message)
         return 0
