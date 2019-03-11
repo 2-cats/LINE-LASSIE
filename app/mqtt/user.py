@@ -15,7 +15,7 @@ def username_to_line_user_id(username):
     )
     cursor = database.cursor()
     args = (username,)
-    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name =  %s", args)
+    cursor.execute("SELECT line_user_id FROM users WHERE aws_user_name=%s and deleted_at IS NULL", args)
     result = cursor.fetchone()
     database.close()
     return result[0]

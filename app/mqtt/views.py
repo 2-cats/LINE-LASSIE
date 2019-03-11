@@ -7,7 +7,7 @@ from linebot import LineBotApi
 from . import mqtt
 from .. import db
 from .alarm import lassie_alarm_message
-from .report import lassie_report
+from .report import lassie_report_message
 from .user import get_push_id, username_to_line_user_id
 
 app = Flask(__name__, instance_relative_config=True)
@@ -26,22 +26,22 @@ mqtt = Mqtt(app)
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
     mqtt.subscribe("/line/gl1/lassie/alarm")
-    mqtt.subscribe("/line/gl1/lassie/report")
+    mqtt.subscribe("/lassie/getTodayReport")
 
 
 # Handle MQTT message
 @mqtt.on_message()
 def handle_mqtt_message(client, userdata, message):
     topic = message.topic
-    if topic == "/line/gl1/lassie/alarm":
+    if topic == '/line/gl1/lassie/alarm':
         payload = json.loads(message.payload.decode())
         message = lassie_alarm_message(payload)
         line_user_id = get_push_id(payload['u'])
         line_bot_api.push_message(line_user_id, message)
         return 0
-    elif topic == "/line/gl1/lassie/report":
+    elif topic == '/lassie/getTodayReport':
         payload = json.loads(message.payload.decode())
-        message = lassie_report(payload)
+        message = lassie_report_message(payload)
         line_user_id = username_to_line_user_id(payload['u'])
         line_bot_api.push_message(line_user_id, message)
         return 0

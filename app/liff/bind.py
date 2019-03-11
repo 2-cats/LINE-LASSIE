@@ -17,7 +17,7 @@ app.config.from_pyfile('config.py')
 
 # Try bind user between LINE and AWS Cognito
 def bind_user(email, phone, line_user_id):
-    phone = phone.replace('0', '+886')
+    phone = phone.replace('0', '+886', 1)
     check_result = query_user_data(email, phone, line_user_id)
     return check_result
 

@@ -9,14 +9,11 @@ from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-def lassie_report(mqtt_message):
-    return lassie_report_message(mqtt_message['d'])
-
-def lassie_report_message(data):
-    thing_name = data.split(',')
-
+def lassie_report_message(mqtt_message):
+    thing_name = mqtt_message['x']
+    data = mqtt_message['d']
     message = FlexSendMessage(
-        alt_text=''.join([thing_name[0], ' 的今日報表']),
+        alt_text=''.join([thing_name, ' 的今日報表']),
         contents=BubbleContainer(
             body=BoxComponent(
                 layout='vertical',
@@ -25,14 +22,14 @@ def lassie_report_message(data):
                 margin='md',
                 contents=[
                     TextComponent(
-                        text=''.join([thing_name[0], ' 的今日報表']),
+                        text=''.join([thing_name, ' 的今日報表']),
                         wrap=True,
                         weight='bold',
                         size='lg',
                         color='#1DB446'
                     ),
                     TextComponent(
-                        text='我已經幫你把今日報表整理完成了，請點擊檢視',
+                        text='我已經幫你整理完成了，請點擊檢視',
                         wrap=True,
                         size='md',
                     )
@@ -44,15 +41,17 @@ def lassie_report_message(data):
                 spacing='md',
                 margin='md',
                 contents=[
-                        ButtonComponent(
+                    ButtonComponent(
                         style='link',
                         action=URIAction(
                             label='檢視報表',
-                            uri=''.join([
-                               app.config['REPORT_LINE_LIFF_URL'],
-                               "?data=",
-                               urllib.parse.quote_plus(str(data))
-                            ])
+                            uri=''.join(
+                                [
+                                    app.config['REPORT_LINE_LIFF_URL'],
+                                    "?data=",
+                                    urllib.parse.quote_plus(str(data))
+                                ]
+                            )
                         )
                     )
                 ]
