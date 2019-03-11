@@ -40,7 +40,7 @@ def line_bind_view():
 
 @liff.route("/line/daily_report", methods=['GET'])
 def line_daily_report():
-    data=request.args.get('data')
+    data = request.args.get('data')
     return render_template(
         'line/report/daily.html',
         davice_data=data
