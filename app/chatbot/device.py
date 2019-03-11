@@ -121,5 +121,4 @@ def get_device_list_data(line_user_id):
                 }
             )
         return thing_data
-    else:
-        return []
+    return []
