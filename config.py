@@ -10,6 +10,7 @@ class Config:
         pass
 
 class DevelopmentConfig(Config):
+    pjdir = os.path.abspath(os.path.dirname(__file__))
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4'.format(
@@ -23,7 +24,6 @@ class DevelopmentConfig(Config):
     MQTT_BROKER_PORT = app.config['MQTT_PORT']
     MQTT_USERNAME = app.config['MQTT_USERNAME']
     MQTT_PASSWORD = app.config['MQTT_PASSWORD']
-
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True

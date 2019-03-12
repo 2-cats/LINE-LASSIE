@@ -4,7 +4,7 @@ import unittest
 from app import create_app, db
 from app.chatbot.follow import follow_message, unfollow
 from app.models import User
-from config import config
+
 
 class FollowTestCase(unittest.TestCase):
     '''
