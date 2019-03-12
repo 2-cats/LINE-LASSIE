@@ -2,7 +2,6 @@ import urllib
 
 import requests
 from flask import Flask
-from flask_mqtt import Mqtt
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, TextComponent, TextSendMessage,
                             URIAction)

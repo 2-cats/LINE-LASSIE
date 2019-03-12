@@ -1,7 +1,7 @@
 import unittest
 import json
 
-from app.mqtt.alarm import lassie_alarm_message
+from app.chatbot.alarm import lassie_alarm_message
 
 class AlarmCounterTestCase(unittest.TestCase):
     def setUp(self):

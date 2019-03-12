@@ -1,9 +1,13 @@
 import json
 import unittest
 
+from flask import Flask
+
 from app.chatbot.error_message import (alert_no_action_message,
                                        alert_to_bind_message)
 
+app = Flask(__name__)
+app.config.from_pyfile("../instance/config.py")
 
 class NoActionMessageTestCase(unittest.TestCase):
     '''
@@ -113,7 +117,7 @@ class NoBindMessageTestCase(unittest.TestCase):
                             "action":{
                                 "label":"點我進行綁定",
                                 "type":"uri",
-                                "uri":"line://app/1633151989-5BJ0B9EZ"
+                                "uri":app.config['BIND_LINE_LIFF_URL']
                             },
                             "height":"sm",
                             "style":"link",

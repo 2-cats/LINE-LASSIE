@@ -287,7 +287,6 @@ def get_shadow(thing_id):
 def alarm_list_message(line_user_id):
     devices_data = get_alarm_list_data(line_user_id)
     message_list = []
-    print (devices_data)
     if devices_data:
         message = have_alarm_message(devices_data)
         message_list.append(message)
