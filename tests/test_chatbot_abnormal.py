@@ -1,11 +1,489 @@
 import json
 import unittest
-
+import datetime
 from app import create_app, db
 from app.chatbot.abnormal import (alarm_list_message, get_alarm_list_data,
                                   get_shadow, have_alarm_message,
                                   no_alarm_message, summary)
 from app.models import User
+
+
+
+class SummaryTestCase(unittest.TestCase):
+    def setUp(self):
+        self.result_message = summary('PI001')
+        time = (datetime.datetime.now() + datetime.timedelta(hours=0)).strftime(
+                                            '%Y-%m-%d %H:%M:%S')
+        self.expected_message =[
+                    {
+                    "altText": "異常總表",
+                    "contents": {
+                      "body": {
+                        "contents": [
+                          {
+                            "contents": [
+                              {
+                                "color": "#030303",
+                                "size": "lg",
+                                "text": "感測器",
+                                "type": "text",
+                                "weight": "bold"
+                              },
+                              {
+                                "align": "end",
+                                "color": "#030303",
+                                "margin": "md",
+                                "size": "lg",
+                                "text": "數值",
+                                "type": "text",
+                                "weight": "bold"
+                              }
+                            ],
+                            "flex": 1,
+                            "layout": "horizontal",
+                            "margin": "md",
+                            "spacing": "sm",
+                            "type": "box"
+                          },
+                          {
+                            "type": "separator"
+                          },
+                          {
+                            "contents": [
+                              {
+                                "contents": [
+                                  {
+                                    "color": "#555555",
+                                    "margin": "md",
+                                    "text": "機台一次數",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "align": "end",
+                                    "color": "#555555",
+                                    "flex": 0,
+                                    "margin": "md",
+                                    "text": "101",
+                                    "type": "text"
+                                  }
+                                ],
+                                "flex": 1,
+                                "layout": "horizontal",
+                                "margin": "md",
+                                "spacing": "sm",
+                                "type": "box"
+                              }
+                            ],
+                            "flex": 1,
+                            "layout": "vertical",
+                            "margin": "md",
+                            "spacing": "sm",
+                            "type": "box"
+                          },
+                          {
+                            "type": "separator"
+                          },
+                          {
+                            "contents": [
+                              {
+                                "align": "start",
+                                "color": "#aaaaaa",
+                                "gravity": "top",
+                                "size": "xs",
+                                "text": "日期",
+                                "type": "text",
+                                "weight": "regular"
+                              },
+                              {
+                                "align": "end",
+                                "color": "#aaaaaa",
+                                "flex": 5,
+                                "gravity": "top",
+                                "margin": "md",
+                                "size": "xs",
+                                "text": time,
+                                "type": "text",
+                                "weight": "regular"
+                              }
+                            ],
+                            "flex": 1,
+                            "layout": "horizontal",
+                            "margin": "md",
+                            "spacing": "sm",
+                            "type": "box"
+                          }
+                        ],
+                        "flex": 1,
+                        "layout": "vertical",
+                        "margin": "md",
+                        "spacing": "sm",
+                        "type": "box"
+                      },
+                      "direction": "ltr",
+                      "header": {
+                        "contents": [
+                          {
+                            "color": "#1DB446",
+                            "margin": "md",
+                            "size": "xxl",
+                            "text": "圖片報告",
+                            "type": "text",
+                            "weight": "bold",
+                            "wrap": True
+                          },
+                          {
+                            "color": "#aaaaaa",
+                            "size": "xs",
+                            "text": "一樓加工區",
+                            "type": "text"
+                          },
+                          {
+                            "type": "separator"
+                          }
+                        ],
+                        "layout": "vertical",
+                        "type": "box"
+                      },
+                      "type": "bubble"
+                    },
+                    "type": "flex"
+                    },
+                    {
+                    "originalContentUrl": "https://i.imgur.com/Hn6lBtg.jpg",
+                    "previewImageUrl": "https://i.imgur.com/Hn6lBtg.jpg",
+                    "type": "image"
+                    },
+                    {
+                    "type": "flex",
+                    "altText": "異常總表",
+                    "contents": {
+                      "body": {
+                        "contents": [
+                          {
+                            "contents": [
+                              {
+                                "color": "#030303",
+                                "size": "lg",
+                                "text": "感測器",
+                                "type": "text",
+                                "weight": "bold"
+                              },
+                              {
+                                "align": "end",
+                                "color": "#030303",
+                                "margin": "md",
+                                "size": "lg",
+                                "text": "數值",
+                                "type": "text",
+                                "weight": "bold"
+                              }
+                            ],
+                            "flex": 1,
+                            "layout": "horizontal",
+                            "margin": "md",
+                            "spacing": "sm",
+                            "type": "box"
+                          },
+                          {
+                            "type": "separator"
+                          },
+                          {
+                            "contents": [
+                              {
+                                "contents": [
+                                  {
+                                    "color": "#555555",
+                                    "margin": "md",
+                                    "text": "燈號2",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "align": "end",
+                                    "color": "#555555",
+                                    "flex": 0,
+                                    "margin": "md",
+                                    "text": "red",
+                                    "type": "text"
+                                  }
+                                ],
+                                "flex": 1,
+                                "layout": "horizontal",
+                                "margin": "md",
+                                "spacing": "sm",
+                                "type": "box"
+                              },
+                              {
+                                "contents": [
+                                  {
+                                    "color": "#555555",
+                                    "margin": "md",
+                                    "text": "計時2",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "align": "end",
+                                    "color": "#555555",
+                                    "flex": 0,
+                                    "margin": "md",
+                                    "text": "100",
+                                    "type": "text"
+                                  }
+                                ],
+                                "flex": 1,
+                                "layout": "horizontal",
+                                "margin": "md",
+                                "spacing": "sm",
+                                "type": "box"
+                              },
+                              {
+                                "contents": [
+                                  {
+                                    "color": "#555555",
+                                    "margin": "md",
+                                    "text": "計次3",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "align": "end",
+                                    "color": "#555555",
+                                    "flex": 0,
+                                    "margin": "md",
+                                    "text": "1002",
+                                    "type": "text"
+                                  }
+                                ],
+                                "flex": 1,
+                                "layout": "horizontal",
+                                "margin": "md",
+                                "spacing": "sm",
+                                "type": "box"
+                              },
+                              {
+                                "contents": [
+                                  {
+                                    "color": "#555555",
+                                    "margin": "md",
+                                    "text": "偵測3",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "align": "end",
+                                    "color": "#555555",
+                                    "flex": 0,
+                                    "margin": "md",
+                                    "text": "1",
+                                    "type": "text"
+                                  }
+                                ],
+                                "flex": 1,
+                                "layout": "horizontal",
+                                "margin": "md",
+                                "spacing": "sm",
+                                "type": "box"
+                              },
+                              {
+                                "contents": [
+                                  {
+                                    "color": "#555555",
+                                    "margin": "md",
+                                    "text": "濕度1",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "align": "end",
+                                    "color": "#555555",
+                                    "flex": 0,
+                                    "margin": "md",
+                                    "text": "35.2",
+                                    "type": "text"
+                                  }
+                                ],
+                                "flex": 1,
+                                "layout": "horizontal",
+                                "margin": "md",
+                                "spacing": "sm",
+                                "type": "box"
+                              }
+                            ],
+                            "flex": 1,
+                            "layout": "vertical",
+                            "margin": "md",
+                            "spacing": "sm",
+                            "type": "box"
+                          },
+                          {
+                            "type": "separator"
+                          },
+                          {
+                            "contents": [
+                              {
+                                "align": "start",
+                                "color": "#aaaaaa",
+                                "gravity": "top",
+                                "size": "xs",
+                                "text": "日期",
+                                "type": "text",
+                                "weight": "regular"
+                              },
+                              {
+                                "align": "end",
+                                "color": "#aaaaaa",
+                                "flex": 5,
+                                "gravity": "top",
+                                "margin": "md",
+                                "size": "xs",
+                                "text": time,
+                                "type": "text",
+                                "weight": "regular"
+                              }
+                            ],
+                            "flex": 1,
+                            "layout": "horizontal",
+                            "margin": "md",
+                            "spacing": "sm",
+                            "type": "box"
+                          }
+                        ],
+                        "flex": 1,
+                        "layout": "vertical",
+                        "margin": "md",
+                        "spacing": "sm",
+                        "type": "box"
+                      },
+                      "direction": "ltr",
+                      "header": {
+                        "contents": [
+                          {
+                            "color": "#1DB446",
+                            "margin": "md",
+                            "size": "xxl",
+                            "text": "報告",
+                            "type": "text",
+                            "weight": "bold",
+                            "wrap": True
+                          },
+                          {
+                            "color": "#aaaaaa",
+                            "size": "xs",
+                            "text": "PI001",
+                            "type": "text"
+                          },
+                          {
+                            "type": "separator"
+                          }
+                        ],
+                        "layout": "vertical",
+                        "type": "box"
+                      },
+                      "type": "bubble"
+                    }
+                    }
+                    ]
+
+
+    def test_summary(self):
+        self.assertEqual(
+            json.loads(str(self.result_message)),
+            self.expected_message
+        )
+
+
+
+class AlarmListTestCase(unittest.TestCase):
+    def setUp(self):
+      self.app = create_app('testing')
+      self.app_context = self.app.app_context()
+      self.app_context.push()
+      db.create_all()
+
+      # Create fake User data
+      user = User(
+        line_user_id='line_user_id',
+        aws_user_name='3413f2a4-9663-4c34-95c9-b0399bb8d884'
+      )
+
+      db.session.add_all([user])
+      db.session.commit()
+
+
+      self.result_message = alarm_list_message(user.line_user_id)
+      self.expected_message =    [{
+            "altText": "異常設備清單",
+            "contents": {
+              "contents": [
+                {
+                  "body": {
+                    "contents": [
+                      {
+                        "size": "lg",
+                        "text": "LassieDrawTest2",
+                        "type": "text",
+                        "weight": "bold",
+                        "wrap": True
+                      },
+                      {
+                        "action": {
+                          "data": "abnormal,LassieDrawTest2",
+                          "displayText": "查詢異常總覽...",
+                          "label": "異常總表",
+                          "type": "postback"
+                        },
+                        "flex": 100,
+                        "gravity": "center",
+                        "height": "sm",
+                        "style": "link",
+                        "type": "button"
+                      }
+                    ],
+                    "layout": "vertical",
+                    "type": "box"
+                  },
+                  "type": "bubble"
+                },
+                {
+                  "body": {
+                    "contents": [
+                      {
+                        "size": "lg",
+                        "text": "PI001",
+                        "type": "text",
+                        "weight": "bold",
+                        "wrap": True
+                      },
+                      {
+                        "action": {
+                          "data": "abnormal,PI001",
+                          "displayText": "查詢異常總覽...",
+                          "label": "異常總表",
+                          "type": "postback"
+                        },
+                        "flex": 100,
+                        "gravity": "center",
+                        "height": "sm",
+                        "style": "link",
+                        "type": "button"
+                      }
+                    ],
+                    "layout": "vertical",
+                    "type": "box"
+                  },
+                  "type": "bubble"
+                }
+              ],
+              "type": "carousel"
+            },
+            "type": "flex"
+          }]
+
+
+
+
+    def test_alarm_list_message(self):
+
+        self.assertEqual(
+            json.loads(str(self.result_message)),
+            self.expected_message
+        )
 
 class GetShadowTestCase(unittest.TestCase):
     def setUp(self):
@@ -940,7 +1418,10 @@ class GetShadowTestCase(unittest.TestCase):
             self.result_message,
             self.expected_message
         )
-
+    def tearDown(self):
+      db.session.remove()  # Remove database session
+      db.drop_all()  # Drop database
+      self.app_context.pop()
 
 class HaveDeviceTestCase(unittest.TestCase):
     def setUp(self):
