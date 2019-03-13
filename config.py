@@ -20,6 +20,7 @@ class DevelopmentConfig(Config):
         app.config['DB_PORT'],
         app.config['DB_NAME']
     )
+    MQTT_CLIENT_ID = app.config['MQTT_CLIENT_ID']
     MQTT_BROKER_URL = app.config['MQTT_HOSTNAME']
     MQTT_BROKER_PORT = app.config['MQTT_PORT']
     MQTT_USERNAME = app.config['MQTT_USERNAME']
@@ -29,6 +30,7 @@ class TestingConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     pjdir = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(pjdir, 'test.db')
+    MQTT_CLIENT_ID = app.config['MQTT_CLIENT_ID']
     MQTT_BROKER_URL = app.config['MQTT_HOSTNAME']
     MQTT_BROKER_PORT = app.config['MQTT_PORT']
     MQTT_USERNAME = app.config['MQTT_USERNAME']
@@ -43,6 +45,7 @@ class ProductionConfig(Config):
         app.config['DB_PORT'],
         app.config['DB_NAME']
     )
+    MQTT_CLIENT_ID = app.config['MQTT_CLIENT_ID']
     MQTT_BROKER_URL = app.config['MQTT_HOSTNAME']
     MQTT_BROKER_PORT = app.config['MQTT_PORT']
     MQTT_USERNAME = app.config['MQTT_USERNAME']
