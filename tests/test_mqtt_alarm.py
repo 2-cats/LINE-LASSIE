@@ -133,7 +133,7 @@ class FourAlarmTestCase(unittest.TestCase):
 
     def setUp(self):
 
-        output=[
+        output= [
                 {
                     "altText": "異常通知",
                     "contents": {
@@ -675,7 +675,7 @@ class AlarmHumidityTestCase(unittest.TestCase):
                   }
                 ]
 
-    def test_lassie_temperature_alarm_message(self):
+    def test_lassie_humidity_alarm_message(self):
         self.assertEquals(
             json.loads(str(self.result_message)),
             self.expected_message
@@ -809,7 +809,7 @@ class AlarmTimerTestCase(unittest.TestCase):
                   }
                 ]
 
-    def test_lassie_temperature_alarm_message(self):
+    def test_lassie_timer_alarm_message(self):
         self.assertEquals(
             json.loads(str(self.result_message)),
             self.expected_message
@@ -947,7 +947,7 @@ class AlarmOcrTestCase(unittest.TestCase):
                   }
                 ]
 
-    def test_lassie_temperature_alarm_message(self):
+    def test_lassie_ocr_alarm_message(self):
         self.assertEquals(
             json.loads(str(self.result_message)),
             self.expected_message
