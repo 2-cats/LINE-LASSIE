@@ -268,19 +268,25 @@ class FourAlarmTestCase(unittest.TestCase):
 
 
 
-    def test_four_alarm_type(self):
+    def test_lamp_alarm_type(self):
         self.assertEquals(
             json.loads(str(self.lamp_result_message)),
             self.lamp_expected_message
         )
+
+    def test_state_alarm_type(self):
         self.assertEquals(
             json.loads(str(self.state_result_message)),
             self.state_expected_message
         )
+
+    def test_color_alarm_type(self):
         self.assertEquals(
             json.loads(str(self.color_result_message)),
             self.color_expected_message
         )
+
+    def test_detector_alarm_type(self):
         self.assertEquals(
             json.loads(str(self.detector_result_message)),
             self.detector_expected_message
