@@ -6,6 +6,100 @@ from app.chatbot.device import (device_list_message, get_device_list_data,
                                 have_device_message, no_device_message)
 from app.models import User
 
+
+class GetDeviceListMessageTestCase(unittest.TestCase):
+    def setUp(self):
+        '''
+        Set up test
+        '''
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+        # Create fake User data
+        user = User(
+            line_user_id='line_user_id',
+            aws_user_name='3413f2a4-9663-4c34-95c9-b0399bb8d884'
+        )
+
+        db.session.add_all([user])
+        db.session.commit()
+
+        self.result_message = device_list_message(user.line_user_id)
+        self.expected_message = {
+                  "altText": "您的設備清單",
+                  "contents": {
+                    "contents": [
+                      {
+                        "body": {
+                          "contents": [
+                            {
+                              "size": "lg",
+                              "text": "PI001",
+                              "type": "text",
+                              "weight": "bold",
+                              "wrap": True
+                            },
+                            {
+                              "color": "#FF3333",
+                              "margin": "md",
+                              "size": "sm",
+                              "text": "離線",
+                              "type": "text",
+                              "wrap": True
+                            }
+                          ],
+                          "layout": "vertical",
+                          "type": "box"
+                        },
+                        "type": "bubble"
+                      },
+                      {
+                        "body": {
+                          "contents": [
+                            {
+                              "size": "lg",
+                              "text": "PI001",
+                              "type": "text",
+                              "weight": "bold",
+                              "wrap": True
+                            },
+                            {
+                              "color": "#FF3333",
+                              "margin": "md",
+                              "size": "sm",
+                              "text": "離線",
+                              "type": "text",
+                              "wrap": True
+                            }
+                          ],
+                          "layout": "vertical",
+                          "type": "box"
+                        },
+                        "type": "bubble"
+                      }
+                    ],
+                    "type": "carousel"
+                  },
+                  "type": "flex"
+                }
+
+    def tearDown(self):
+        db.session.remove()  # Remove database session
+        db.drop_all()  # Drop database
+        self.app_context.pop()
+
+    def test_get_device_list_message(self):
+        self.assertEqual(
+            json.loads(str(self.result_message)),
+            self.expected_message
+        )
+
+
+
+
+
 class NoDeviceTestCase(unittest.TestCase):
     def setUp(self):
         '''
