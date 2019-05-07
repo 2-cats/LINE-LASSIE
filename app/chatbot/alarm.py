@@ -1,76 +1,97 @@
-import urllib
-
+import time
 from flask import Flask
-from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
-                            FlexSendMessage, IconComponent, ImageComponent,
-                            ImageSendMessage, SeparatorComponent,
-                            TextComponent, URIAction)
+from linebot.models import (BoxComponent, BubbleContainer, FlexSendMessage,
+                            ImageComponent, ImageSendMessage, SeparatorComponent,
+                            TextComponent)
 
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
 def lassie_alarm_message(mqtt_message):
+    message_list = []
     unit = ''
     rule = ''
-    if mqtt_message['t'] == 'counter':
+    alarm_value = ''
+    alarm_time = time.localtime(int(mqtt_message['timestamp']))
+    if mqtt_message['sensorType'] == 'counter':
         unit = ' (次)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['r']),
+            str(mqtt_message['rule']),
             ' 次'
         ])
-    elif (mqtt_message['t'] == 'lamp') or (mqtt_message['t'] == 'state') or (mqtt_message['t'] == 'color') or (mqtt_message['t'] == 'detector'):
+        alarm_value = mqtt_message['value']
+    elif (mqtt_message['sensorType'] == 'lamp') or (mqtt_message['sensorType'] == 'detector'):
         unit = ' (偵測值)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['r'])
+            str(mqtt_message['rule'])
         ])
-    elif mqtt_message['t'] == 'current':
+        alarm_value = mqtt_message['value']
+    elif mqtt_message['sensorType'] == 'current':
         unit = ' (mAh)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['r']),
+            str(mqtt_message['rules']['low']),
+            " ～ ",
+            str(mqtt_message['rules']['high']),
             ' mAh'
         ])
-    elif mqtt_message['t'] == 'temperature':
+        alarm_value = mqtt_message['value']
+    elif mqtt_message['sensorType'] == 'temperature':
         unit = ' (℃)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['ra']['h']),
+            str(mqtt_message['rules']['low']),
             " ～ ",
-            str(mqtt_message['ra']['l']),
+            str(mqtt_message['rules']['high']),
             ' ℃'
         ])
-    elif mqtt_message['t'] == 'humidity':
+        alarm_value = mqtt_message['value']
+    elif mqtt_message['sensorType'] == 'humidity':
         unit = ' (%)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['ra']['h']),
+            str(mqtt_message['rules']['low']),
             " ～ ",
-            str(mqtt_message['ra']['l']),
+            str(mqtt_message['rules']['high']),
             ' %'
         ])
-    elif mqtt_message['t'] == 'timer':
+        alarm_value = mqtt_message['value']
+    elif mqtt_message['sensorType'] == 'timer':
         unit = ' (秒)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['r']),
+            str(mqtt_message['rule']),
             ' 秒'
         ])
-
-    elif mqtt_message['t'] == 'ocr':
+        alarm_value = mqtt_message['value']
+    elif mqtt_message['sensorType'] == 'ocr':
         unit = '(偵測值)'
         rule = ''.join([
             '設定 : ',
-            str(mqtt_message['ra']['h']),
+            str(mqtt_message['rules']['low']),
             " ～ ",
-            str(mqtt_message['ra']['l'])
+            str(mqtt_message['rules']['high']),
         ])
-
-    message_list = []
-
-    if mqtt_message['url'] != "":
+        alarm_value = mqtt_message['value']
+        message = ImageSendMessage(
+            original_content_url=str(mqtt_message['url']),
+            preview_image_url=str(mqtt_message['url'])
+        )
+        message_list.append(message)
+    elif mqtt_message['sensorType'] == 'color':
+        unit = ''
+        rule = ''.join([
+            '設定 : ',
+            str(mqtt_message['rules']['color']),
+            " 持續 ",
+            str(mqtt_message['rules']['high']),
+            ' 秒'
+        ])
+        alarm_value = str(mqtt_message['values']['color'] +
+                          ' ' + mqtt_message['values']['time'] + '秒')
         message = ImageSendMessage(
             original_content_url=str(mqtt_message['url']),
             preview_image_url=str(mqtt_message['url'])
@@ -93,7 +114,7 @@ def lassie_alarm_message(mqtt_message):
                 margin='md',
                 contents=[
                     TextComponent(
-                        text=mqtt_message['nt'] + ' 異常',
+                        text=mqtt_message['thingDisplayName'] + ' 異常',
                         weight='bold',
                         wrap=True,
                         size='xl',
@@ -116,7 +137,7 @@ def lassie_alarm_message(mqtt_message):
                                 margin='md',
                                 contents=[
                                     TextComponent(
-                                        text=mqtt_message['ns'],
+                                        text=mqtt_message['sensorDisplayName'],
                                         weight='bold',
                                         wrap=True,
                                         size='md',
@@ -127,7 +148,7 @@ def lassie_alarm_message(mqtt_message):
                                         gravity='top'
                                     ),
                                     TextComponent(
-                                        text=str(mqtt_message['v']) + unit,
+                                        text=str(alarm_value) + unit,
                                         weight='bold',
                                         wrap=False,
                                         size='xl',
@@ -154,7 +175,7 @@ def lassie_alarm_message(mqtt_message):
                     ),
                     SeparatorComponent(),
                     TextComponent(
-                        text=mqtt_message['time'],
+                        text=time.strftime('%Y-%m-%d %H:%M:%S', alarm_time),
                         weight='regular',
                         wrap=True,
                         size='xs',
