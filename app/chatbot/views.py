@@ -185,10 +185,10 @@ def handle_connect(client, userdata, flags, rc):
 @mqtt.on_message()
 def handle_mqtt_message(client, userdata, message):
     topic = message.topic
-    if topic == '/line/gl1/lassie/alarm':
+    if topic == '@goodlinker/notification/rule':
         payload = json.loads(message.payload.decode())
         message = lassie_alarm_message(payload)
-        line_user_id = get_push_id(payload['u'])
+        line_user_id = get_push_id(payload['endUserSub'])
         line_bot_api.push_message(line_user_id, message)
         return 0
     elif topic == '/lassie/getTodayReport':
