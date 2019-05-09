@@ -77,7 +77,7 @@ def summary(thing_id):
                                 margin='md',
                                 contents=[
                                     TextComponent(
-                                        text='感測器',
+                                        text='規則名稱',
                                         weight='bold',
                                         color='#030303',
                                         size='lg'
@@ -107,7 +107,7 @@ def summary(thing_id):
                                         contents=[
                                             TextComponent(
                                                 text=things_shadow_json['state']['reported']
-                                                [thing_name][surv]['n'],
+                                                [thing_name][surv]['rn'],
                                                 color='#555555',
                                                 margin='md'
                                             ),
