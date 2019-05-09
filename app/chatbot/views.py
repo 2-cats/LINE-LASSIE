@@ -177,7 +177,7 @@ def handle_sticker_message(event):
 
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
-    mqtt.subscribe("/line/gl1/lassie/alarm")
+    mqtt.subscribe("@goodlinker/notification/rule")
     mqtt.subscribe("/lassie/getTodayReport")
 
 
