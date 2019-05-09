@@ -106,12 +106,14 @@ def summary(thing_id):
                                         margin='md',
                                         contents=[
                                             TextComponent(
-                                                text=things_shadow_json['state']['reported'][thing_name][surv]['n'],
+                                                text=things_shadow_json['state']['reported']
+                                                [thing_name][surv]['n'],
                                                 color='#555555',
                                                 margin='md'
                                             ),
                                             TextComponent(
-                                                text=things_shadow_json['state']['reported'][thing_name][surv]['v'],
+                                                text=things_shadow_json['state']['reported']
+                                                [thing_name][surv]['v'],
                                                 flex=0,
                                                 color='#555555',
                                                 margin='md',
@@ -138,8 +140,9 @@ def summary(thing_id):
                                         gravity="top"
                                     ),
                                     TextComponent(
-                                        text=(datetime.datetime.now() + datetime.timedelta(hours=0)).strftime(
-                                            '%Y-%m-%d %H:%M:%S'),
+                                        text=(datetime.datetime.now() +
+                                              datetime.timedelta(hours=0)).strftime(
+                                                  '%Y-%m-%d %H:%M:%S'),
                                         weight='regular',
                                         color='#aaaaaa',
                                         margin='md',
@@ -162,17 +165,18 @@ def summary(thing_id):
                 )
                 message_list.append(message)
                 message = ImageSendMessage(
-                    original_content_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url']),
-                    preview_image_url=str(things_shadow_json['state']['reported'][thing_name][surv]['url'])
+                    original_content_url=str(things_shadow_json['state']['reported']
+                                             [thing_name][surv]['url']),
+                    preview_image_url=str(things_shadow_json['state']['reported']
+                                          [thing_name][surv]['url'])
                 )
                 message_list.append(message)
-    
     bubble = BubbleContainer(
         direction='ltr',
         header=BoxComponent(
             layout='vertical',
             contents=[
-               TextComponent(
+                TextComponent(
                     text='報告',
                     wrap=True,
                     color='#1DB446',
@@ -180,12 +184,12 @@ def summary(thing_id):
                     weight='bold',
                     margin='md',
                 ),
-               TextComponent(
-                    text=thing_id,
+                TextComponent(
+                    text=things_shadow_json['state']['reported']['n'],
                     size='xs',
                     color='#aaaaaa',
                 ),
-               SeparatorComponent(),
+                SeparatorComponent(),
             ],
         ),
         body=BoxComponent(
@@ -200,22 +204,22 @@ def summary(thing_id):
                     spacing='sm',
                     margin='md',
                     contents=[
-                TextComponent(
-                    text='感測器',
-                    weight='bold',
-                    color='#030303',
-                    size='lg'
+                        TextComponent(
+                            text='感測器',
+                            weight='bold',
+                            color='#030303',
+                            size='lg'
+                            ),
+                        TextComponent(
+                            text='數值',
+                            weight='bold',
+                            color='#030303',
+                            margin='md',
+                            align='end',
+                            size='lg'
+                            )
+                        ]
                     ),
-                TextComponent(
-                    text='數值',
-                    weight='bold',
-                    color='#030303',
-                    margin='md',
-                    align='end',
-                    size='lg'
-                    )
-                ]
-            ),
                 SeparatorComponent(),
                 BoxComponent(
                     layout='vertical',
@@ -241,7 +245,7 @@ def summary(thing_id):
                         ),
                         TextComponent(
                             text=(datetime.datetime.now() + datetime.timedelta(hours=0)).strftime(
-                                            '%Y-%m-%d %H:%M:%S'),
+                                '%Y-%m-%d %H:%M:%S'),
                             weight='regular',
                             color='#aaaaaa',
                             margin='md',
@@ -314,13 +318,13 @@ def have_alarm_message(devices_data):
         )
         things_shadow_json = json.loads(things_shadow.text)
         if things_shadow_json is not None:
-            if things_shadow_json['state']['reported']['errs'] !=[]:
+            if things_shadow_json['state']['reported']['errs'] != []:
                 bubble_template = BubbleContainer(
                     body=BoxComponent(
                         layout='vertical',
                         contents=[
                             TextComponent(
-                                text=str(device_data['display_name']),
+                                text=str(things_shadow_json['state']['reported']['n']),
                                 wrap=True,
                                 weight='bold',
                                 size='lg',
@@ -392,24 +396,10 @@ def get_alarm_list_data(line_user_id):
         thing_data = []
         things_response_json = json.loads(things_response.text)
         for thing in things_response_json['data']:
-            thing_response = requests.get(
-                ''.join([
-                    app.config['SENSOR_LIVE_API_URL'],
-                    'projects/',
-                    app.config['SENSOR_LIVE_PROJECT_ID'],
-                    '/things/',
-                    thing['name']
-                ]),
-                headers={
-                    'Account': app.config['SENSOR_LIVE_ACCOUNT'],
-                    'Authorization': app.config['SENSOR_LIVE_TOKEN']
-                }
-            )
-            thing_response_json = json.loads(thing_response.text)
+
             thing_data.append(
                 {
-                    'name': thing_response_json['name'],
-                    'display_name': thing_response_json['display_name']
+                    'name': thing['name']
                 }
             )
         return thing_data
