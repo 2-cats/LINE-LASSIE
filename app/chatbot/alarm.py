@@ -12,7 +12,6 @@ def lassie_alarm_message(mqtt_message):
     message_list = []
     unit = ''
     rule = ''
-    alarm_value = ''
     alarm_time = time.localtime(int(mqtt_message['timestamp']))
     if mqtt_message['sensorType'] == 'counter':
         unit = ' (次)'
@@ -21,14 +20,12 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rule']),
             ' 次'
         ])
-        alarm_value = mqtt_message['value']
     elif (mqtt_message['sensorType'] == 'lamp') or (mqtt_message['sensorType'] == 'detector'):
         unit = ' (偵測值)'
         rule = ''.join([
             '設定 : ',
             str(mqtt_message['rule'])
         ])
-        alarm_value = mqtt_message['value']
     elif mqtt_message['sensorType'] == 'current':
         unit = ' (mAh)'
         rule = ''.join([
@@ -38,7 +35,6 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' mAh'
         ])
-        alarm_value = mqtt_message['value']
     elif mqtt_message['sensorType'] == 'temperature':
         unit = ' (℃)'
         rule = ''.join([
@@ -48,7 +44,6 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' ℃'
         ])
-        alarm_value = mqtt_message['value']
     elif mqtt_message['sensorType'] == 'humidity':
         unit = ' (%)'
         rule = ''.join([
@@ -58,7 +53,6 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' %'
         ])
-        alarm_value = mqtt_message['value']
     elif mqtt_message['sensorType'] == 'timer':
         unit = ' (秒)'
         rule = ''.join([
@@ -66,7 +60,6 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rule']),
             ' 秒'
         ])
-        alarm_value = mqtt_message['value']
     elif mqtt_message['sensorType'] == 'ocr':
         unit = '(偵測值)'
         rule = ''.join([
@@ -75,7 +68,6 @@ def lassie_alarm_message(mqtt_message):
             " ～ ",
             str(mqtt_message['rules']['high']),
         ])
-        alarm_value = mqtt_message['value']
         message = ImageSendMessage(
             original_content_url=str(mqtt_message['url']),
             preview_image_url=str(mqtt_message['url'])
@@ -90,8 +82,7 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' 秒'
         ])
-        alarm_value = str(mqtt_message['values']['color'] +
-                          ' ' + mqtt_message['values']['time'] + '秒')
+
         message = ImageSendMessage(
             original_content_url=str(mqtt_message['url']),
             preview_image_url=str(mqtt_message['url'])
@@ -148,7 +139,7 @@ def lassie_alarm_message(mqtt_message):
                                         gravity='top'
                                     ),
                                     TextComponent(
-                                        text=str(alarm_value) + unit,
+                                        text=str(mqtt_message['value']) + unit,
                                         weight='bold',
                                         wrap=False,
                                         size='xl',
