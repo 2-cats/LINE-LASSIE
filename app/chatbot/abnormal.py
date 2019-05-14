@@ -5,8 +5,7 @@ import requests
 from flask import Flask
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             CarouselContainer, FlexSendMessage,
-                            ImageSendMessage, PostbackAction,
-                            SeparatorComponent, TextComponent, TextSendMessage)
+                            PostbackAction, SeparatorComponent, TextComponent, TextSendMessage)
 
 from ..models import User
 
@@ -17,167 +16,238 @@ def summary(thing_id):
     things_shadow_json = get_shadow(thing_id)
     bubble_template_columns = []
     message_list = []
+    surv_for_cam = []
     for thing_name in things_shadow_json['state']['reported']['errs']:
         if not thing_name.startswith("cam"):
-            message = BoxComponent(
-                layout='horizontal',
-                flex=1,
-                spacing='sm',
-                margin='md',
-                contents=[
-                    TextComponent(
-                        text=things_shadow_json['state']['reported'][thing_name]['n'],
-                        color='#555555',
-                        margin='md'
-                    ),
-                    TextComponent(
-                        text=things_shadow_json['state']['reported'][thing_name]['v'],
-                        flex=0,
-                        color='#555555',
-                        margin='md',
-                        align='end'
-                    ),
+            if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name]['r']:
+                message = BoxComponent(
+                    layout='horizontal',
+                    flex=1,
+                    spacing='sm',
+                    margin='md',
+                    contents=[
+                        TextComponent(
+                            text=things_shadow_json['state']['reported'][thing_name]['n'],
+                            color='#555555',
+                            margin='md'
+                        ),
+                        TextComponent(
+                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'] ,  '［' ,
+                                 things_shadow_json['state']['reported'][thing_name]['r']['l'] ,  '～'
+                                 ,  things_shadow_json['state']['reported'][thing_name]['r']['h'] ,  '］']),
+                            flex=0,
+                            color='#555555',
+                            margin='md',
+                            align='end'
+                        ),
 
-                ]
-            )
-            bubble_template_columns.append(message)
+                    ]
+                )
+                bubble_template_columns.append(message)
+            else:
+                message = BoxComponent(
+                    layout='horizontal',
+                    flex=1,
+                    spacing='sm',
+                    margin='md',
+                    contents=[
+                        TextComponent(
+                            text=things_shadow_json['state']['reported'][thing_name]['n'],
+                            color='#555555',
+                            margin='md'
+                        ),
+                        TextComponent(
+                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'], '［'
+                                 ,  things_shadow_json['state']['reported'][thing_name]['r'] ,  '］']),
+                            flex=0,
+                            color='#555555',
+                            margin='md',
+                            align='end'
+                        ),
+
+                    ]
+                )
+                bubble_template_columns.append(message)
         else:
             for surv in things_shadow_json['state']['reported'][thing_name]['errs']:
-                bubble_for_cam = BubbleContainer(
-                    direction='ltr',
-                    header=BoxComponent(
-                        layout='vertical',
-                        contents=[
-                            TextComponent(
-                                text='圖片報告',
-                                wrap=True,
-                                color='#1DB446',
-                                size='xxl',
-                                weight='bold',
-                                margin='md',
-                            ),
-                            TextComponent(
-                                text=things_shadow_json['state']['reported']['n'],
-                                size='xs',
-                                color='#aaaaaa',
-                            ),
-                            SeparatorComponent(),
-                        ],
-                    ),
-                    body=BoxComponent(
-                        layout='vertical',
+
+                if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name][surv]['r']:
+                    surv_message = BoxComponent(
+                        layout='horizontal',
                         flex=1,
                         spacing='sm',
                         margin='md',
                         contents=[
-                            BoxComponent(
-                                layout='horizontal',
-                                flex=1,
-                                spacing='sm',
-                                margin='md',
-                                contents=[
-                                    TextComponent(
-                                        text='規則名稱',
-                                        weight='bold',
-                                        color='#030303',
-                                        size='lg'
-                                    ),
-                                    TextComponent(
-                                        text='數值',
-                                        weight='bold',
-                                        color='#030303',
-                                        margin='md',
-                                        align='end',
-                                        size='lg'
-                                    )
-                                ]
-                            ),
-                            SeparatorComponent(),
-                            BoxComponent(
-                                layout='vertical',
-                                flex=1,
-                                spacing='sm',
-                                margin='md',
-                                contents=[
-                                    BoxComponent(
-                                        layout='horizontal',
-                                        flex=1,
-                                        spacing='sm',
-                                        margin='md',
-                                        contents=[
-                                            TextComponent(
-                                                text=things_shadow_json['state']['reported']
+                            TextComponent(
+                                text=things_shadow_json['state']['reported']
                                                 [thing_name][surv]['rn'],
-                                                color='#555555',
-                                                margin='md'
-                                            ),
-                                            TextComponent(
-                                                text=things_shadow_json['state']['reported']
-                                                [thing_name][surv]['v'],
-                                                flex=0,
-                                                color='#555555',
-                                                margin='md',
-                                                align='end'
-                                            ),
-
+                                color='#42659a',
+                                margin='md',
+                                wrap=True,
+                                action=PostbackAction(label=things_shadow_json['state']['reported']
+                                [thing_name][surv]['rn'],data=','.join(
+                                        [
+                                            'get_abnormal_pic',
+                                            things_shadow_json['state']['reported']
+                                            [thing_name][surv]['url']
                                         ]
                                     )
-                                ]
+                                ),
                             ),
-                            SeparatorComponent(),
-                            BoxComponent(
-                                layout='horizontal',
-                                flex=1,
-                                spacing='sm',
+                            TextComponent(
+                                text=''.join([things_shadow_json['state']['reported']
+                                                [thing_name][surv]['v'] , '［' ,  things_shadow_json['state']['reported']
+                                                [thing_name][surv]['r']['l'], '～', things_shadow_json['state']['reported']
+                                                [thing_name][surv]['r']['h'], '］']),
+                                flex=0,
+                                color='#555555',
                                 margin='md',
-                                contents=[
-                                    TextComponent(
-                                        text='日期',
-                                        weight='regular',
-                                        align='start',
-                                        color='#aaaaaa',
-                                        size='xs',
-                                        gravity="top"
-                                    ),
-                                    TextComponent(
-                                        text=(datetime.datetime.now() +
-                                              datetime.timedelta(hours=0)).strftime(
-                                                  '%Y-%m-%d %H:%M:%S'),
-                                        weight='regular',
-                                        color='#aaaaaa',
-                                        margin='md',
-                                        align='end',
-                                        size='xs',
-                                        gravity="top",
-                                        flex=5
-                                    ),
+                                align='end',
+                                wrap=True
 
-                                ]
                             ),
-
                         ]
-                    ),
+                    )
+                    surv_for_cam.append(surv_message)
+                else:
+                    surv_message = BoxComponent(
+                        layout='horizontal',
+                        flex=1,
+                        spacing='sm',
+                        margin='md',
+                        contents=[
+                            TextComponent(
+                                text=things_shadow_json['state']['reported']
+                                [thing_name][surv]['rn'],
+                                color='#42659a',
+                                margin='md',
+                                action=PostbackAction(label=things_shadow_json['state']['reported']
+                                [thing_name][surv]['rn'], data=','.join(
+                                        [
+                                            'get_abnormal_pic',
+                                            things_shadow_json['state']['reported']
+                                            [thing_name][surv]['url']
+                                        ]
+                                    )
+                                ),
+                                wrap=True
+                            ),
+                            TextComponent(
+                                text=''.join([things_shadow_json['state']['reported']
+                                [thing_name][surv]['v']['c'] , '［',  things_shadow_json['state']['reported']
+                                [thing_name][surv]['v']['t'] ,  "秒", '］']),
+                                flex=0,
+                                color='#555555',
+                                margin='md',
+                                align='end',
+                                wrap=True
+                            ),
+                        ]
+                    )
+                    surv_for_cam.append(surv_message)
+            bubble_for_cam = BubbleContainer(
+                direction='ltr',
+                header=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        TextComponent(
+                            text='圖片異常總覽',
+                            wrap=True,
+                            color='#1DB446',
+                            size='xxl',
+                            weight='bold',
+                            margin='md',
+                        ),
+                        TextComponent(
+                            text=things_shadow_json['state']['reported']['n'],
+                            size='lg',
+                            color='#aaaaaa',
+                        ),
+                        SeparatorComponent(margin='xl'),
+                    ],
+                ),
+                body=BoxComponent(
+                    layout='vertical',
+                    flex=1,
+                    spacing='sm',
+                    margin='md',
+                    contents=[
+                        BoxComponent(
+                            layout='horizontal',
+                            flex=1,
+                            spacing='sm',
+                            margin='md',
+                            contents=[
+                                TextComponent(
+                                    text='規則名稱',
+                                    weight='bold',
+                                    color='#030303',
+                                    size='lg'
+                                ),
+                                TextComponent(
+                                    text='數值［規則］',
+                                    weight='bold',
+                                    color='#030303',
+                                    margin='md',
+                                    align='end',
+                                    size='lg'
+                                )
+                            ]
+                        ),
+                        SeparatorComponent(margin='xl'),
+                        BoxComponent(
+                            layout='vertical',
+                            flex=1,
+                            spacing='sm',
+                            margin='md',
+                            contents=surv_for_cam
+                        ),
+                        SeparatorComponent(margin='xl'),
+                        BoxComponent(
+                            layout='horizontal',
+                            flex=1,
+                            spacing='sm',
+                            margin='md',
+                            contents=[
+                                TextComponent(
+                                    text='日期',
+                                    weight='regular',
+                                    align='start',
+                                    color='#aaaaaa',
+                                    size='xs',
+                                    gravity="top"
+                                ),
+                                TextComponent(
+                                    text=(datetime.datetime.now() +
+                                          datetime.timedelta(hours=0)).strftime(
+                                              '%Y-%m-%d %H:%M:%S'),
+                                    weight='regular',
+                                    color='#aaaaaa',
+                                    margin='md',
+                                    align='end',
+                                    size='xs',
+                                    gravity="top",
+                                    flex=5
+                                ),
 
+                            ]
+                        ),
+
+                    ]
                 )
-                message = FlexSendMessage(
-                    alt_text='異常總表',
-                    contents=bubble_for_cam
-                )
-                message_list.append(message)
-                message = ImageSendMessage(
-                    original_content_url=str(things_shadow_json['state']['reported']
-                                             [thing_name][surv]['url']),
-                    preview_image_url=str(things_shadow_json['state']['reported']
-                                          [thing_name][surv]['url'])
-                )
-                message_list.append(message)
+            )
+            message = FlexSendMessage(
+                alt_text='異常總表',
+                contents=bubble_for_cam
+            )
+            message_list.append(message)
     bubble = BubbleContainer(
         direction='ltr',
         header=BoxComponent(
             layout='vertical',
             contents=[
                 TextComponent(
-                    text='報告',
+                    text='異常總覽',
                     wrap=True,
                     color='#1DB446',
                     size='xxl',
@@ -186,10 +256,10 @@ def summary(thing_id):
                 ),
                 TextComponent(
                     text=things_shadow_json['state']['reported']['n'],
-                    size='xs',
+                    size='lg',
                     color='#aaaaaa',
                 ),
-                SeparatorComponent(),
+                SeparatorComponent(margin='xl'),
             ],
         ),
         body=BoxComponent(
@@ -211,7 +281,7 @@ def summary(thing_id):
                             size='lg'
                             ),
                         TextComponent(
-                            text='數值',
+                            text='數值［規則］',
                             weight='bold',
                             color='#030303',
                             margin='md',
@@ -220,7 +290,7 @@ def summary(thing_id):
                             )
                         ]
                     ),
-                SeparatorComponent(),
+                SeparatorComponent(margin='xl'),
                 BoxComponent(
                     layout='vertical',
                     flex=1,
@@ -228,7 +298,7 @@ def summary(thing_id):
                     margin='md',
                     contents=bubble_template_columns
                 ),
-                SeparatorComponent(),
+                SeparatorComponent(margin='xl'),
                 BoxComponent(
                     layout='horizontal',
                     flex=1,
