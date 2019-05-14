@@ -19,7 +19,7 @@ def summary(thing_id):
     surv_for_cam = []
     for thing_name in things_shadow_json['state']['reported']['errs']:
         if not thing_name.startswith("cam"):
-            try:
+            if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name]['r']:
                 message = BoxComponent(
                     layout='horizontal',
                     flex=1,
@@ -32,8 +32,9 @@ def summary(thing_id):
                             margin='md'
                         ),
                         TextComponent(
-                            text=things_shadow_json['state']['reported'][thing_name]['v'] + '［'
-                                 + things_shadow_json['state']['reported'][thing_name]['r'] + '］',
+                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'] ,  '［' ,
+                                 things_shadow_json['state']['reported'][thing_name]['r']['l'] ,  '～'
+                                 ,  things_shadow_json['state']['reported'][thing_name]['r']['h'] ,  '］']),
                             flex=0,
                             color='#555555',
                             margin='md',
@@ -43,7 +44,7 @@ def summary(thing_id):
                     ]
                 )
                 bubble_template_columns.append(message)
-            except:
+            else:
                 message = BoxComponent(
                     layout='horizontal',
                     flex=1,
@@ -56,9 +57,8 @@ def summary(thing_id):
                             margin='md'
                         ),
                         TextComponent(
-                            text=things_shadow_json['state']['reported'][thing_name]['v'] + '［' +
-                                 things_shadow_json['state']['reported'][thing_name]['r']['l'] + '～'
-                                 + things_shadow_json['state']['reported'][thing_name]['r']['h'] + '］',
+                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'], '［'
+                                 ,  things_shadow_json['state']['reported'][thing_name]['r'] ,  '］']),
                             flex=0,
                             color='#555555',
                             margin='md',
@@ -71,7 +71,7 @@ def summary(thing_id):
         else:
             for surv in things_shadow_json['state']['reported'][thing_name]['errs']:
 
-                if things_shadow_json['state']['reported'][thing_name][surv]['t']=="ocr":
+                if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name][surv]['r']:
                     surv_message = BoxComponent(
                         layout='horizontal',
                         flex=1,
@@ -95,10 +95,10 @@ def summary(thing_id):
                                 ),
                             ),
                             TextComponent(
-                                text=things_shadow_json['state']['reported']
-                                                [thing_name][surv]['v'] +'［' + things_shadow_json['state']['reported']
-                                                [thing_name][surv]['r']['l']+'～'+things_shadow_json['state']['reported']
-                                                [thing_name][surv]['r']['h']+'］',
+                                text=''.join([things_shadow_json['state']['reported']
+                                                [thing_name][surv]['v'] , '［' ,  things_shadow_json['state']['reported']
+                                                [thing_name][surv]['r']['l'], '～', things_shadow_json['state']['reported']
+                                                [thing_name][surv]['r']['h'], '］']),
                                 flex=0,
                                 color='#555555',
                                 margin='md',
@@ -133,9 +133,9 @@ def summary(thing_id):
                                 wrap=True
                             ),
                             TextComponent(
-                                text=things_shadow_json['state']['reported']
-                                [thing_name][surv]['v']['c'] +'［'+ things_shadow_json['state']['reported']
-                                [thing_name][surv]['v']['t'] + "秒"+'］',
+                                text=''.join([things_shadow_json['state']['reported']
+                                [thing_name][surv]['v']['c'] , '［',  things_shadow_json['state']['reported']
+                                [thing_name][surv]['v']['t'] ,  "秒", '］']),
                                 flex=0,
                                 color='#555555',
                                 margin='md',
