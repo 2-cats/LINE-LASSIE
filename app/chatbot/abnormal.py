@@ -18,59 +18,8 @@ def summary(thing_id):
     message_list = []
     surv_for_cam = []
     for thing_name in things_shadow_json['state']['reported']['errs']:
-        if not thing_name.startswith("cam"):
-            if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name]['r']:
-                message = BoxComponent(
-                    layout='horizontal',
-                    flex=1,
-                    spacing='sm',
-                    margin='md',
-                    contents=[
-                        TextComponent(
-                            text=things_shadow_json['state']['reported'][thing_name]['n'],
-                            color='#555555',
-                            margin='md'
-                        ),
-                        TextComponent(
-                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'] ,  '［' ,
-                                 things_shadow_json['state']['reported'][thing_name]['r']['l'] ,  '～'
-                                 ,  things_shadow_json['state']['reported'][thing_name]['r']['h'] ,  '］']),
-                            flex=0,
-                            color='#555555',
-                            margin='md',
-                            align='end'
-                        ),
-
-                    ]
-                )
-                bubble_template_columns.append(message)
-            else:
-                message = BoxComponent(
-                    layout='horizontal',
-                    flex=1,
-                    spacing='sm',
-                    margin='md',
-                    contents=[
-                        TextComponent(
-                            text=things_shadow_json['state']['reported'][thing_name]['n'],
-                            color='#555555',
-                            margin='md'
-                        ),
-                        TextComponent(
-                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'], '［'
-                                 ,  things_shadow_json['state']['reported'][thing_name]['r'] ,  '］']),
-                            flex=0,
-                            color='#555555',
-                            margin='md',
-                            align='end'
-                        ),
-
-                    ]
-                )
-                bubble_template_columns.append(message)
-        else:
+        if thing_name.startswith("cam"):
             for surv in things_shadow_json['state']['reported'][thing_name]['errs']:
-
                 if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name][surv]['r']:
                     surv_message = BoxComponent(
                         layout='horizontal',
@@ -241,6 +190,56 @@ def summary(thing_id):
                 contents=bubble_for_cam
             )
             message_list.append(message)
+        else:
+            if 'h' and 'l' in things_shadow_json['state']['reported'][thing_name]['r']:
+                message = BoxComponent(
+                    layout='horizontal',
+                    flex=1,
+                    spacing='sm',
+                    margin='md',
+                    contents=[
+                        TextComponent(
+                            text=things_shadow_json['state']['reported'][thing_name]['n'],
+                            color='#555555',
+                            margin='md'
+                        ),
+                        TextComponent(
+                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'] ,  '［' ,
+                                 things_shadow_json['state']['reported'][thing_name]['r']['l'] ,  '～'
+                                 ,  things_shadow_json['state']['reported'][thing_name]['r']['h'] ,  '］']),
+                            flex=0,
+                            color='#555555',
+                            margin='md',
+                            align='end'
+                        ),
+
+                    ]
+                )
+                bubble_template_columns.append(message)
+            else:
+                message = BoxComponent(
+                    layout='horizontal',
+                    flex=1,
+                    spacing='sm',
+                    margin='md',
+                    contents=[
+                        TextComponent(
+                            text=things_shadow_json['state']['reported'][thing_name]['n'],
+                            color='#555555',
+                            margin='md'
+                        ),
+                        TextComponent(
+                            text=''.join([things_shadow_json['state']['reported'][thing_name]['v'], '［'
+                                 ,  things_shadow_json['state']['reported'][thing_name]['r'] ,  '］']),
+                            flex=0,
+                            color='#555555',
+                            margin='md',
+                            align='end'
+                        ),
+
+                    ]
+                )
+                bubble_template_columns.append(message)
     bubble = BubbleContainer(
         direction='ltr',
         header=BoxComponent(
@@ -379,8 +378,6 @@ def get_abnormal_pic(url):
             original_content_url=str(url)
         )
     return message
-
-
 
 def have_alarm_message(devices_data):
     carousel_template_columns = []
