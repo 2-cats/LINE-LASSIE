@@ -436,7 +436,7 @@ def have_alarm_message(devices_data):
                                             device_data['name']
                                         ]
                                     ),
-                                    display_text=''.join(['好的，我正在幫你查詢 ', device_data['name'] ,' 的異常總覽'])
+                                    display_text=''.join(['查詢 ', device_data['name'] ,' 的異常總覽'])
                                 ),
                                 style='link'
                             ),
