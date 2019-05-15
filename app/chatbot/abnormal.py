@@ -5,7 +5,7 @@ import requests
 from flask import Flask
 from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             CarouselContainer, FlexSendMessage,
-                            PostbackAction, SeparatorComponent, TextComponent, TextSendMessage)
+                            PostbackAction, SeparatorComponent, TextComponent, TextSendMessage,ImageSendMessage)
 
 from ..models import User
 
@@ -369,6 +369,19 @@ def alarm_list_message(line_user_id):
         message_list.append(message)
     return message_list
 
+def get_abnormal_pic(url):
+    """Get abnormal picture from alarm list message
+
+    :param str url: url for the picture url
+    """
+    message = ImageSendMessage(
+            preview_image_url=str(url),
+            original_content_url=str(url)
+        )
+    return message
+
+
+
 def have_alarm_message(devices_data):
     carousel_template_columns = []
     for device_data in devices_data:
@@ -475,3 +488,4 @@ def get_alarm_list_data(line_user_id):
         return thing_data
     else:
         return []
+
