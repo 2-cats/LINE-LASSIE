@@ -9,9 +9,9 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
                             StickerMessage, TextMessage, TextSendMessage,
                             UnfollowEvent)
 
-from . import chatbot
 from .. import db, mqtt
-from .abnormal import alarm_list_message, summary
+from . import chatbot
+from .abnormal import get_abnormal_pic, alarm_list_message, summary
 from .alarm import lassie_alarm_message
 from .bind import bind_member, check_bind
 from .contact import contact_us
@@ -127,6 +127,12 @@ def handle_postback(event):
     if postback_data[0] == "abnormal":
         thing_id = postback_data[1]
         message = summary(thing_id)
+        line_bot_api.reply_message(event.reply_token, message)
+        return 0
+
+    if postback_data[0] == "get_abnormal_pic":
+        surv_url = postback_data[1]
+        message = get_abnormal_pic(surv_url)
         line_bot_api.reply_message(event.reply_token, message)
         return 0
 
