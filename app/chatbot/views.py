@@ -11,7 +11,7 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
 
 from .. import db, mqtt
 from . import chatbot
-from .abnormal import get_abnormal_pic, alarm_list_message, summary
+from .abnormal import alarm_list_message, get_abnormal_pic, summary
 from .alarm import lassie_alarm_message
 from .bind import bind_member, check_bind
 from .contact import contact_us
