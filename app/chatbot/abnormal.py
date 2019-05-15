@@ -89,7 +89,7 @@ def summary(thing_id):
                                         [
                                             'get_abnormal_pic',
                                             things_shadow_json['state']['reported']
-                                            [thing_name][surv]['url']
+                                            [thing_name][surv]['errurl']
                                         ]
                                     )
                                 ),
@@ -126,7 +126,7 @@ def summary(thing_id):
                                         [
                                             'get_abnormal_pic',
                                             things_shadow_json['state']['reported']
-                                            [thing_name][surv]['url']
+                                            [thing_name][surv]['errurl']
                                         ]
                                     )
                                 ),
