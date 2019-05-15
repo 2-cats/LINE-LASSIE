@@ -21,7 +21,7 @@ def summary(thing_id):
     things_shadow = get_shadow(thing_id)
     things_reported = things_shadow['state']['reported']
 
-    # Store general surv message
+    # Store all message
     message_list = []
 
     # Store camera surv message
@@ -75,7 +75,6 @@ def summary(thing_id):
                                 margin='md',
                                 align='end',
                                 wrap=True
-
                             ),
                         ]
                     )
