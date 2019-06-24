@@ -37,7 +37,7 @@ def summary(thing_id):
             for surv in things_reported[thing_name]['errs']:
                 # Generate cam surv content component
                 # Check key: h and l in rule
-                if 'h' and 'l' in things_reported[thing_name][surv]['r']:
+                if 'l' in things_reported[thing_name][surv]['r'] and 'h' in things_reported[thing_name][surv]['r']:
                     cam_surv_content = BoxComponent(
                         layout='horizontal',
                         flex=1,
@@ -125,7 +125,7 @@ def summary(thing_id):
         else:
             # Generate surv content component
             # If key 'h' and 'l' in rule.
-            if 'h' and 'l' in things_reported[thing_name]['r']:
+            if 'h' in things_reported[thing_name]['r'] and 'l' in things_reported[thing_name]['r']:
                 surv_content = BoxComponent(
                     layout='horizontal',
                     flex=1,
