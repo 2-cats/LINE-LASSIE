@@ -12,7 +12,7 @@ def lassie_alarm_message(mqtt_message):
     message_list = []
     unit = ''
     rule = ''
-    alarm_time = time.localtime(int(mqtt_message['timestamp']))
+    alarm_time = time.localtime(int(mqtt_message['timestamp']/1000))
     if mqtt_message['sensorType'] == 'counter':
         unit = ' (次)'
         rule = ''.join([

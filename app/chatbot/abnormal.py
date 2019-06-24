@@ -54,7 +54,7 @@ def summary(thing_id):
                                     data=','.join(
                                         [
                                             'get_abnormal_pic',
-                                            things_reported[thing_name][surv]['errurl']
+                                            things_reported[thing_name][surv]['eu']
                                         ]
                                     )
                                 ),
@@ -94,7 +94,7 @@ def summary(thing_id):
                                     data=','.join(
                                         [
                                             'get_abnormal_pic',
-                                            things_reported[thing_name][surv]['errurl']
+                                            things_reported[thing_name][surv]['eu']
                                         ]
                                     )
                                 ),
@@ -105,7 +105,8 @@ def summary(thing_id):
                                     [
                                         things_reported[thing_name][surv]['v']['c'],
                                         '［',
-                                        things_reported[thing_name][surv]['v']['t'],
+                                        things_reported[thing_name][surv]['r']['c'],
+                                        things_reported[thing_name][surv]['r']['h'],
                                         "秒",
                                         '］'
                                     ]
@@ -185,108 +186,108 @@ def summary(thing_id):
                     ]
                 )
             surv_contents.append(surv_content)
-
     # Genetate cam alarm message
-    message = FlexSendMessage(
-        alt_text='異常總表',
-        contents = BubbleContainer(
-            direction='ltr',
-            header=BoxComponent(
-                layout='vertical',
-                contents=[
-                    TextComponent(
-                        text='圖片異常總覽',
-                        wrap=True,
-                        color='#1DB446',
-                        size='xxl',
-                        margin='md',
-                    ),
-                    TextComponent(
-                        text=things_reported['n'],
-                        size='lg',
-                        margin='sm',
-                        color='#aaaaaa',
-                    ),
-                    SeparatorComponent(
-                        margin='xl'
-                    ),
-                ],
-            ),
-            body=BoxComponent(
-                layout='vertical',
-                flex=1,
-                spacing='sm',
-                margin='md',
-                contents=[
-                    BoxComponent(
-                        layout='horizontal',
-                        flex=1,
-                        spacing='sm',
-                        margin='md',
-                        contents=[
-                            TextComponent(
-                                text='規則名稱',
-                                weight='bold',
-                                color='#030303',
-                                size='lg'
-                            ),
-                            TextComponent(
-                                text='數值［規則］',
-                                color='#030303',
-                                margin='md',
-                                align='end',
-                                size='lg'
-                            )
-                        ]
-                    ),
-                    SeparatorComponent(
-                        margin='md'
-                    ),
-                    BoxComponent(
-                        layout='vertical',
-                        flex=1,
-                        spacing='sm',
-                        margin='md',
-                        contents=cam_surv_contents
-                    ),
-                    SeparatorComponent(
-                        margin='md'
-                    ),
-                    BoxComponent(
-                        layout='horizontal',
-                        flex=1,
-                        spacing='sm',
-                        margin='md',
-                        contents=[
-                            TextComponent(
-                                text='日期',
-                                weight='regular',
-                                align='start',
-                                color='#aaaaaa',
-                                size='xs',
-                                gravity="top"
-                            ),
-                            TextComponent(
-                                text=(datetime.datetime.now() +
-                                    datetime.timedelta(hours=0)).strftime(
+    if cam_surv_contents != []:
+        message = FlexSendMessage(
+            alt_text='異常總表',
+            contents=BubbleContainer(
+                direction='ltr',
+                header=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        TextComponent(
+                            text='圖片異常總覽',
+                            wrap=True,
+                            color='#1DB446',
+                            size='xxl',
+                            margin='md',
+                        ),
+                        TextComponent(
+                            text=things_reported['n'],
+                            size='lg',
+                            margin='sm',
+                            color='#aaaaaa',
+                        ),
+                        SeparatorComponent(
+                            margin='xl'
+                        ),
+                    ],
+                ),
+                body=BoxComponent(
+                    layout='vertical',
+                    flex=1,
+                    spacing='sm',
+                    margin='md',
+                    contents=[
+                        BoxComponent(
+                            layout='horizontal',
+                            flex=1,
+                            spacing='sm',
+                            margin='md',
+                            contents=[
+                                TextComponent(
+                                    text='規則名稱',
+                                    weight='bold',
+                                    color='#030303',
+                                    size='lg'
+                                ),
+                                TextComponent(
+                                    text='數值［規則］',
+                                    color='#030303',
+                                    margin='md',
+                                    align='end',
+                                    size='lg'
+                                )
+                            ]
+                        ),
+                        SeparatorComponent(
+                            margin='md'
+                        ),
+                        BoxComponent(
+                            layout='vertical',
+                            flex=1,
+                            spacing='sm',
+                            margin='md',
+                            contents=cam_surv_contents
+                        ),
+                        SeparatorComponent(
+                            margin='md'
+                        ),
+                        BoxComponent(
+                            layout='horizontal',
+                            flex=1,
+                            spacing='sm',
+                            margin='md',
+                            contents=[
+                                TextComponent(
+                                    text='日期',
+                                    weight='regular',
+                                    align='start',
+                                    color='#aaaaaa',
+                                    size='xs',
+                                    gravity="top"
+                                ),
+                                TextComponent(
+                                    text=(datetime.datetime.now() +
+                                          datetime.timedelta(hours=0)).strftime(
                                         '%Y-%m-%d %H:%M:%S'),
-                                weight='regular',
-                                color='#aaaaaa',
-                                margin='md',
-                                align='end',
-                                size='xs',
-                                gravity="top",
-                                flex=5
-                            ),
+                                    weight='regular',
+                                    color='#aaaaaa',
+                                    margin='md',
+                                    align='end',
+                                    size='xs',
+                                    gravity="top",
+                                    flex=5
+                                ),
 
-                        ]
-                    ),
+                            ]
+                        ),
 
-                ]
+                    ]
+                )
             )
         )
-    )
-    message_list.append(message)
+        message_list.append(message)
 
     # Genetate general alarm message
     message = FlexSendMessage(
@@ -407,6 +408,7 @@ def have_alarm_message(devices_data):
     :param str devices_data: thing data
     """
     carousel_template_columns = []
+    print(devices_data)
     for device_data in devices_data:
 
         # Get shadow
