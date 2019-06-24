@@ -408,7 +408,6 @@ def have_alarm_message(devices_data):
     :param str devices_data: thing data
     """
     carousel_template_columns = []
-    print(devices_data)
     for device_data in devices_data:
 
         # Get shadow
