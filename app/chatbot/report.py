@@ -26,7 +26,7 @@ def make_report_message(mqtt, line_user_id):
                 '/getTodayReport'
             ]
         )
-        mqtt.publish(topic, '')
+        mqtt.publish(topic, '', qos=1)
     else:
         content = '錯誤的指令'
     return TextSendMessage(text=content)
