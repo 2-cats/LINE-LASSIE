@@ -1,4 +1,5 @@
 import json
+import re
 
 from flask import Flask, abort, current_app, render_template, request
 from flask_mqtt import Mqtt
@@ -11,9 +12,9 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
 
 from .. import db, mqtt
 from . import chatbot
-from .abnormal import alarm_list_message, abnormal_pic_message, summary
+from .abnormal import abnormal_pic_message, alarm_list_message, summary
 from .alarm import lassie_alarm_message
-from .bind import bind_member, check_bind
+from .bind import bind_aws, bind_member, check_bind
 from .contact import contact_us
 from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
@@ -86,26 +87,34 @@ def handle_message(event):
                 message = alarm_list_message(line_user_id)
                 line_bot_api.push_message(line_user_id, message)
                 return 0
-            if message_text == "聯絡我們":
+            elif message_text == "聯絡我們":
                 message = contact_us(line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-            if message_text == "設備清單":
+            elif message_text == "設備清單":
                 message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
                 line_bot_api.reply_message(event.reply_token, message)
                 message = device_list_message(line_user_id)
                 line_bot_api.push_message(line_user_id, message)
                 return 0
-            if message_text == "今日報表":
+            elif message_text == "今日報表":
                 message = make_report_message(mqtt, line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-            message = alert_no_action_message()
-            line_bot_api.reply_message(event.reply_token, message)
-            return 0
-        message = alert_to_bind_message()
-        line_bot_api.reply_message(event.reply_token, message)
-        return 0
+            else:
+                message = alert_no_action_message()
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+        else:
+            if bool(re.search('bind-', message_text)):
+                aws_username = message_text.replace('bind-', '')
+                message = bind_aws(aws_username, line_user_id)
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+            else:
+                message = alert_to_bind_message()
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
     elif source_type == 'room':
         if message_text == "綁定萊西":
             message = bind_member(line_user_id, event.source.room_id, 'room')

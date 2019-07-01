@@ -8,6 +8,36 @@ from linebot.models import TextSendMessage
 from .. import db
 from ..models import Member, User
 
+# Bind user from aws coginto
+def bind_aws(aws_username, line_user_id):
+    if len(aws_username)>15:
+        if check_aws_bind_is_exist(aws_username):
+            return TextSendMessage(text='這個使用者已經被綁定過')
+        else:
+            user = User(
+                line_user_id=line_user_id,
+                aws_user_name=aws_username
+            )
+            try:
+                db.session.add(user)
+                db.session.commit()
+                content = '綁定成功'
+            except:
+                content = '綁定失敗'
+            return TextSendMessage(text=content)
+    else:
+        return TextSendMessage(text='糟糕，出了一些問題！')
+    
+
+# Check aws user is exist in database
+def check_aws_bind_is_exist(aws_username):
+    user = User.query.filter_by(
+        aws_user_name=aws_username,
+        deleted_at=None
+    ).first()
+    if user == None:
+        return False
+    return True
 
 # Check user is bind
 def check_bind(line_user_id):
