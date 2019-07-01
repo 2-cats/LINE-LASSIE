@@ -21,6 +21,7 @@ def bind_aws(aws_username, line_user_id):
             try:
                 db.session.add(user)
                 db.session.commit()
+                User.link_rm_to_user(user)
                 content = '綁定成功'
             except:
                 content = '綁定失敗'
