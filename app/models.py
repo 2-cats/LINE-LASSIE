@@ -57,3 +57,15 @@ class Member(db.Model):
 
     def __repr__(self):
         return '<Member %r>' % self.source_id
+
+class CaptureLog(db.Model):
+    __tablename__ = 'capture_logs'
+    id = db.Column(db.Integer, primary_key = True)
+    source_id = db.Column(db.String(64))
+    source_type = db.Column(db.String(64))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    deleted_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return '<CaptureLog %r>' % self.id
