@@ -1,4 +1,5 @@
 import json
+import re
 
 from flask import Flask, abort, current_app, render_template, request
 from flask_mqtt import Mqtt
@@ -11,11 +12,11 @@ from linebot.models import (AudioMessage, FollowEvent, ImageMessage, JoinEvent,
 
 from .. import db, mqtt
 from . import chatbot
-from .abnormal import alarm_list_message, abnormal_pic_message, summary
+from .abnormal import abnormal_pic_message, alarm_list_message, summary
 from .alarm import lassie_alarm_message
-from .bind import bind_member, check_bind
+from .bind import bind_aws, bind_member, check_bind
+from .camera import device_list_message, make_camera_capture, lassie_capture_message
 from .contact import contact_us
-from .device import device_list_message
 from .error_message import alert_no_action_message, alert_to_bind_message
 from .follow import follow_message, unfollow
 from .report import lassie_report_message, make_report_message
@@ -86,26 +87,39 @@ def handle_message(event):
                 message = alarm_list_message(line_user_id)
                 line_bot_api.push_message(line_user_id, message)
                 return 0
-            if message_text == "聯絡我們":
+            elif message_text == "聯絡我們":
                 message = contact_us(line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-            if message_text == "設備清單":
+            elif message_text == "畫面擷取":
                 message = TextSendMessage(text='稍等一下！我正在找您的萊西...')
                 line_bot_api.reply_message(event.reply_token, message)
                 message = device_list_message(line_user_id)
                 line_bot_api.push_message(line_user_id, message)
                 return 0
-            if message_text == "今日報表":
+            elif message_text == "今日報表":
                 message = make_report_message(mqtt, line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-            message = alert_no_action_message()
-            line_bot_api.reply_message(event.reply_token, message)
-            return 0
-        message = alert_to_bind_message()
-        line_bot_api.reply_message(event.reply_token, message)
-        return 0
+            elif bool(re.search('capture', message_text)):
+                thing_name = message_text.replace('capture', '')
+                message = make_camera_capture(mqtt, thing_name, line_user_id)
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+            else:
+                message = alert_no_action_message()
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+        else:
+            if bool(re.search('bind-', message_text)):
+                aws_username = message_text.replace('bind-', '')
+                message = bind_aws(aws_username, line_user_id)
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
+            else:
+                message = alert_to_bind_message()
+                line_bot_api.reply_message(event.reply_token, message)
+                return 0
     elif source_type == 'room':
         if message_text == "綁定萊西":
             message = bind_member(line_user_id, event.source.room_id, 'room')
@@ -185,6 +199,7 @@ def handle_sticker_message(event):
 def handle_connect(client, userdata, flags, rc):
     mqtt.subscribe("@goodlinker/notification/rule")
     mqtt.subscribe("/lassie/getTodayReport")
+    mqtt.subscribe("/lassie/getCapture")
 
 
 # Handle MQTT message
@@ -200,6 +215,12 @@ def handle_mqtt_message(client, userdata, message):
     elif topic == '/lassie/getTodayReport':
         payload = json.loads(message.payload.decode())
         message = lassie_report_message(payload)
+        line_user_id = username_to_line_user_id(payload['u'])
+        line_bot_api.push_message(line_user_id, message)
+        return 0
+    elif topic == '/lassie/getCapture':
+        payload = json.loads(message.payload.decode())
+        message = lassie_capture_message(payload)
         line_user_id = username_to_line_user_id(payload['u'])
         line_bot_api.push_message(line_user_id, message)
         return 0

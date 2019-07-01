@@ -6,6 +6,7 @@ from linebot.models import (BoxComponent, BubbleContainer, ButtonComponent,
                             FlexSendMessage, TextComponent, TextSendMessage,
                             URIAction)
 
+from .. import db
 from ..models import User
 
 app = Flask(__name__, instance_relative_config=True)
