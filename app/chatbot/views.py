@@ -120,16 +120,16 @@ def handle_message(event):
                 message = alert_to_bind_message()
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
-    elif source_type == 'room':
-        if message_text == "綁定萊西":
-            message = bind_member(line_user_id, event.source.room_id, 'room')
-            line_bot_api.reply_message(event.reply_token, message)
-            return 0
-    elif source_type == 'group':
-        if message_text == "綁定萊西":
-            message = bind_member(line_user_id, event.source.group_id, 'group')
-            line_bot_api.reply_message(event.reply_token, message)
-            return 0
+    # elif source_type == 'room':
+    #     if message_text == "綁定萊西":
+    #         message = bind_member(line_user_id, event.source.room_id, 'room')
+    #         line_bot_api.reply_message(event.reply_token, message)
+    #         return 0
+    # elif source_type == 'group':
+    #     if message_text == "綁定萊西":
+    #         message = bind_member(line_user_id, event.source.group_id, 'group')
+    #         line_bot_api.reply_message(event.reply_token, message)
+    #         return 0
 
 # Postback Event
 @handler.add(PostbackEvent)
