@@ -139,7 +139,7 @@ def make_camera_capture(mqtt, thing_name, line_user_id):
                 ]
             )
             payload = {
-                'tn': thing_name
+                "tn": thing_name
             }
             mqtt.publish(topic, str(payload))
         else:

@@ -102,7 +102,7 @@ def handle_message(event):
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
             elif bool(re.search('capture', message_text)):
-                thing_name = message_text.replace('capture', '')
+                thing_name = message_text.replace('capture ', '')
                 message = make_camera_capture(mqtt, thing_name, line_user_id)
                 line_bot_api.reply_message(event.reply_token, message)
                 return 0
