@@ -115,7 +115,7 @@ def get_device_list_data(line_user_id):
             thing_response_json = json.loads(thing_response.text)
             thing_data.append(
                 {
-                    'name': thing_response_json['display_name']
+                    'name': thing_response_json['name']
                 }
             )
         return thing_data
