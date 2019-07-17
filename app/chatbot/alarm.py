@@ -12,21 +12,22 @@ def lassie_alarm_message(mqtt_message):
     message_list = []
     unit = ''
     rule = ''
+    sensor_type = mqtt_message['sensorType']
     alarm_time = time.localtime(int(mqtt_message['timestamp']/1000))
-    if mqtt_message['sensorType'] == 'counter':
+    if sensor_type == 'counter':
         unit = ' (次)'
         rule = ''.join([
             '設定 : ',
             str(mqtt_message['rule']),
             ' 次'
         ])
-    elif (mqtt_message['sensorType'] == 'lamp') or (mqtt_message['sensorType'] == 'detector'):
+    elif (sensor_type == 'lamp') or (sensor_type == 'detector'):
         unit = ' (偵測值)'
         rule = ''.join([
             '設定 : ',
             str(mqtt_message['rule'])
         ])
-    elif mqtt_message['sensorType'] == 'current':
+    elif sensor_type == 'current':
         unit = ' (mAh)'
         rule = ''.join([
             '設定 : ',
@@ -35,7 +36,7 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' mAh'
         ])
-    elif mqtt_message['sensorType'] == 'temperature':
+    elif sensor_type == 'temperature':
         unit = ' (℃)'
         rule = ''.join([
             '設定 : ',
@@ -44,7 +45,7 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' ℃'
         ])
-    elif mqtt_message['sensorType'] == 'humidity':
+    elif sensor_type == 'humidity':
         unit = ' (%)'
         rule = ''.join([
             '設定 : ',
@@ -53,14 +54,14 @@ def lassie_alarm_message(mqtt_message):
             str(mqtt_message['rules']['high']),
             ' %'
         ])
-    elif mqtt_message['sensorType'] == 'timer':
+    elif sensor_type == 'timer':
         unit = ' (秒)'
         rule = ''.join([
             '設定 : ',
             str(mqtt_message['rule']),
             ' 秒'
         ])
-    elif mqtt_message['sensorType'] == 'ocr':
+    elif sensor_type == 'ocr':
         unit = '(偵測值)'
         rule = ''.join([
             '設定 : ',
@@ -73,7 +74,7 @@ def lassie_alarm_message(mqtt_message):
             preview_image_url=str(mqtt_message['url'])
         )
         message_list.append(message)
-    elif mqtt_message['sensorType'] == 'color':
+    elif sensor_type == 'color':
         unit = ''
         rule = ''.join([
             '設定 : ',
@@ -92,12 +93,6 @@ def lassie_alarm_message(mqtt_message):
     message = FlexSendMessage(
         alt_text='異常通知',
         contents=BubbleContainer(
-            hero=ImageComponent(
-                url='https://i.imgur.com/GIrEMgY.png',
-                size='full',
-                aspect_ratio='20:13',
-                aspect_mode='cover'
-            ),
             body=BoxComponent(
                 layout='vertical',
                 flex=1,
